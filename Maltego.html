@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - Maltego Community Edition</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-maltego">
+      <h2>Maltego Community Edition</h2>
+      <p>Maltego Community Edition is a free, open-source intelligence (OSINT) and link analysis application developed by Maltego Technologies. It enables users to gather, visualize, and analyze relationships between entities such as domains, IP addresses, email addresses, people, social media profiles, and documents through automated transforms that query public sources and integrated data providers. The tool excels in reconnaissance, footprinting, and mapping attack surfaces ethically during security assessments.</p>
+      <img src="https://www.maltego.com/wp-content/uploads/2023/06/maltego-graph-example.png" alt="Maltego Graph Visualization Example" class="img-fluid">
+      <h3>Uses</h3>
+      <p>Maltego is primarily used for passive and active OSINT reconnaissance, entity relationship mapping, and identifying connections in ethical hacking and investigations. Example: Starting from a domain name, running transforms to enumerate subdomains, associated emails, IP addresses, and linked social profiles to build a comprehensive target footprint for authorized penetration testing.</p>
+      <h3>Installation in Termux</h3>
+      <p>Maltego is a Java-based desktop GUI application and is not natively supported in Termux due to Android's limited GUI capabilities. Full functionality requires a desktop OS (Windows, Linux, macOS) or emulation in Termux via proot-distro with X11 forwarding. Steps for desktop/community edition:</p>
+      <pre><code># On desktop (recommended): Download from official site
+# Visit https://www.maltego.com/downloads/ and select Community Edition (free registration required)
+# Install Java 11+ if not present, then run the installer (.deb/.rpm/.exe/.zip)
+# For Termux/Android (limited GUI via VNC/X11):
+pkg install proot-distro -y
+proot-distro install ubuntu
+proot-distro login ubuntu
+# Inside Ubuntu chroot:
+apt update && apt upgrade -y
+apt install default-jre wget -y
+# Download and install Maltego .deb (adjust version):
+wget https://www.maltego.com/downloads/Maltego.deb  # Or current .deb link
+dpkg -i Maltego.deb
+# Launch with X11/VNC setup (requires external VNC viewer app connected to localhost:5901)</code></pre>
+      <p>Common issues: GUI not displaying—ensure VNC/X11 is configured; limited transforms in CE—register for free Maltego ID to unlock Community Edition features (200 credits/month). To uninstall: Remove the proot-distro or application files. Optimal use occurs on a desktop with sufficient RAM (8GB+ recommended).</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Create graph: New Graph → Drag entity (e.g., Domain) from palette. Run transforms: Right-click entity → All Transforms → To DNS Name [using DNS]. View results: Expand graph nodes/edges. Export: Graph → Export Image/Report. Manage transforms: Machines → Manage Entities/Transforms. Always register/login with Maltego ID for data access. Use ethically on authorized targets only.</p>
+      <img src="https://docs.maltego.com/images/transform-run-example.png" alt="Running Transforms in Maltego" class="img-fluid">
+
+      <h3>Detailed Tutorial: Basic Domain Reconnaissance with OSINT (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates performing passive OSINT reconnaissance on a public domain using Maltego Community Edition in a controlled, ethical context (e.g., analyzing your own domain or a public test target with no active exploitation). Maltego must be used only for lawful purposes with explicit authorization where required. Unauthorized reconnaissance may violate terms of service or laws.</p>
+      <ol>
+        <li>Launch Maltego and log in: Open the application, select Community Edition, and sign in/register with your free Maltego ID (required for transforms).</li>
+        <li>Create a new graph: Click New Graph (or File → New). From the Entity Palette (left sidebar), drag a "Domain" entity onto the graph canvas.</li>
+        <li>Set target entity: Double-click the Domain entity and enter a test domain (e.g., example.com or your own authorized domain). Press Enter to save.</li>
+        <li>Run basic transforms: Right-click the Domain entity → All Transforms → Footprint L1 (or To DNS Name [using DNS], To IP Address [using DNS], etc.). Select and run; Maltego queries public sources and adds linked entities (subdomains, IPs, NS records) as nodes.</li>
+        <li>Expand reconnaissance: Right-click new entities (e.g., a discovered subdomain) → Run additional transforms such as To Website Title, To Email Addresses [using search engines], or To Person [from social profiles]. Observe the growing graph of relationships.</li>
+        <li>Analyze graph: Use zoom/pan tools; hover nodes for details; right-click edges for properties. Apply layouts (e.g., Organic or Hierarchical) via Graph → Layout for clarity.</li>
+        <li>Document findings: Export graph (Graph → Export Image) or generate a report (Graph → Export Report). Review connections ethically for security insights (e.g., exposed subdomains or misconfigurations).</li>
+        <li>Reset and clean up: Close graph without saving if testing; clear transform history if desired (Manage → Transform History). Always respect data source terms and privacy.</li>
+      </ol>
+      <p>Expected results: A visual graph revealing domain infrastructure (subdomains, IPs, MX records), associated emails, and potential links to people or documents from public sources. Common issues: Transform limits in CE—manage credits; no results—verify entity type and internet connectivity. For advanced use, explore custom transforms via Maltego TRX (Python library).</p>
+      <img src="https://www.maltego.com/wp-content/uploads/2023/06/maltego-osint-graph.png" alt="Maltego Domain Reconnaissance Graph Example" class="img-fluid">
+      <p>For authoritative reference, consult the official resources: <a href="https://www.maltego.com/downloads" target="_blank">Maltego Downloads and Community Edition</a>, <a href="https://docs.maltego.com/" target="_blank">Maltego Documentation</a>, and <a href="https://www.maltego.com/blog" target="_blank">Maltego Blog Tutorials</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

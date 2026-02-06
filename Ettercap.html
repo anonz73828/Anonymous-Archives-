@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - Ettercap</title>
+  <!-- Paste the full <style> block from index.html here, including the .binary-bg class and animation keyframes for the blue binary pattern moving upward -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <!-- Same links as previous pages; highlight Tools if desired -->
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Remaining nav items -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-ettercap">
+      <h2>Ettercap</h2>
+      <p>Ettercap is a free and open-source comprehensive suite designed for man-in-the-middle (MITM) attacks on local area networks. It supports sniffing of live connections, content filtering on the fly, active and passive dissection of numerous protocols (including encrypted ones), ARP poisoning, DNS spoofing, and various features for network and host analysis.</p>
+      <img src="https://www.ettercap-project.org/images/ettercap-gtk.png" alt="Ettercap Graphical Interface Example" class="img-fluid">
+      <h3>Uses</h3>
+      <p>Ettercap is utilized for network security auditing, protocol analysis, interception of traffic, demonstration of MITM vulnerabilities, and credential capture in controlled environments. Example: Performing ARP spoofing to position oneself between two hosts and inspect or modify their communication during authorized penetration testing.</p>
+      <h3>Installation in Termux</h3>
+      <p>Ettercap is not available as a standard package in Termux repositories. Compilation from source is possible but requires dependencies and may face permission or library issues. A common approach uses community repositories (e.g., tur-repo) or manual build. For text-only mode (recommended in Termux due to limited GUI support):</p>
+      <pre><code>pkg update && pkg upgrade -y
+pkg install tur-repo -y  # If tur-repo is available; check current status
+pkg install ettercap-common ettercap-text-only -y
+# Alternatively, compile from source:
+pkg install git cmake build-essential libpcap libnet libpcre flex bison -y
+git clone https://github.com/Ettercap/ettercap.git
+cd ettercap
+mkdir build && cd build
+cmake ..
+make
+# Run as: ./bin/ettercap -T (text mode)</code></pre>
+      <p>Common issues: Permission denied on config files—edit <code>/etc/ettercap/etter.conf</code> with proper access; GUI mode requires X11/VNC setup (similar to Wireshark). To uninstall: Remove the build directory and packages. Always test in an isolated lab network.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Launch text mode: <code>ettercap -T</code>. Unified sniffing: Select interface and targets. ARP poisoning: <code>ettercap -T -M arp:remote /target1/ /target2/</code>. Sniff passwords: Enable plugins like autoadd or dns_spoof. Full options: <code>ettercap --help</code>. Operate only on networks with explicit authorization.</p>
+      <img src="https://www.comparitech.com/wp-content/uploads/2024/11/Ettercap-GUI.jpg" alt="Ettercap ARP Poisoning in Progress" class="img-fluid">
+
+      <h3>Detailed Tutorial: Performing ARP Spoofing MITM Attack (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates a basic ARP poisoning MITM attack using Ettercap in text mode on a controlled lab network (e.g., virtual machines on the same subnet). This must be conducted only in environments you own or have explicit written permission to test. Unauthorized interception or modification of traffic is illegal and unethical.</p>
+      <ol>
+        <li>Prepare the environment: Ensure you are on the same LAN as the targets (e.g., victim at 192.168.1.50, gateway at 192.168.1.1). Enable IP forwarding if needed: <code>echo 1 > /proc/sys/net/ipv4/ip_forward</code> (or use <code>sysctl -w net.ipv4.ip_forward=1</code>).</li>
+        <li>Launch Ettercap in text mode: <code>ettercap -T -q</code> (-q for quiet mode to reduce output noise).</li>
+        <li>Scan for hosts: Press 's' to scan the local subnet or manually add targets. Use 'h' to view the host list.</li>
+        <li>Add targets: Select the victim IP (e.g., 192.168.1.50) as Target 1 and the gateway/router IP (e.g., 192.168.1.1) as Target 2. Press 't' to set targets.</li>
+        <li>Start ARP poisoning: Press 'p' to start the MITM attack (Ettercap begins ARP spoofing, redirecting traffic through your device).</li>
+        <li>Sniff traffic: Ettercap automatically captures and displays packets. Use plugins (press 'o' to manage) such as 'autoadd', 'dns_spoof', or 'remote_browser' for advanced features. Observe credentials or HTTP data in real time.</li>
+        <li>Monitor and interact: Watch for dissected protocols (e.g., HTTP POST data). For demonstration, visit an HTTP site on the victim machine and observe captured form submissions.</li>
+        <li>Stop the attack: Press 'p' again to stop poisoning, then 'q' to quit Ettercap. Restore ARP tables naturally or manually on targets if needed.</li>
+        <li>Clean up: Disable IP forwarding if enabled (<code>echo 0 > /proc/sys/net/ipv4/ip_forward</code>). Document observations responsibly for security reporting.</li>
+      </ol>
+      <p>Expected results: Traffic redirection succeeds, allowing inspection of unencrypted data between targets. Common issues: Targets use HTTPS (limits visibility—demonstrate downgrade risks ethically); ARP cache persistence—wait or flush caches post-test. Use display filters or logs for analysis.</p>
+      <img src="https://hackzone.in/wp-content/uploads/2025/03/ettercap-arp-spoofing-tutorial.png" alt="Ettercap ARP Spoofing Output Example" class="img-fluid">
+      <p>For comprehensive reference, consult the official documentation: <a href="https://www.ettercap-project.org/" target="_blank">Ettercap Project Website</a> and <a href="https://github.com/Ettercap/ettercap" target="_blank">GitHub Repository</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

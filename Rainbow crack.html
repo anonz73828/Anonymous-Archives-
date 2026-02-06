@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - RainbowCrack</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-rainbowcrack">
+      <h2>RainbowCrack</h2>
+      <p>RainbowCrack is an implementation of the time-memory trade-off technique for reversing cryptographic hash functions, originally developed by Philippe Oechslin. It enables extremely fast password recovery from captured password hashes when a precomputed rainbow table exists for the target hash algorithm, character set, and password length. Rainbow tables trade significant storage requirements for near-instantaneous lookup time, making RainbowCrack highly effective for offline auditing of unsalted or weakly protected hashes (e.g., LM, NTLM, MD5, SHA-1) during authorized security assessments.</p>
+      <img src="https://project-rainbowcrack.com/images/rainbowcrack-logo.png" alt="RainbowCrack Logo" class="img-fluid">
+      <h3>Uses</h3>
+      <p>RainbowCrack is employed in ethical password auditing to recover plaintext from password hashes obtained from system dumps, SAM files, NTDS.dit extracts, or other sources during authorized penetration testing. Example: Quickly cracking NTLM hashes from a captured Windows domain credential dump using precomputed rainbow tables to evaluate password strength and enforce stronger policies.</p>
+      <h3>Installation in Termux</h3>
+      <p>RainbowCrack is not packaged in Termux repositories and requires compilation from source. Performance is CPU-limited on mobile devices; GPU acceleration is not supported in Termux. Installation steps:</p>
+      <pre><code>pkg update && pkg upgrade -y
+pkg install git build-essential clang make -y
+git clone https://github.com/RainbowCrack/rainbowcrack.git
+cd rainbowcrack
+# Build (may need adjustments for Termux paths)
+make
+# Test: ./rtgen -h
+# Or download pre-built binaries for Linux from project site (if compatible)
+# wget https://project-rainbowcrack.com/rainbowcrack-1.8-linux64.zip
+# unzip rainbowcrack-1.8-linux64.zip
+# cd rainbowcrack-1.8-linux64</code></pre>
+      <p>Common issues: Compilation errors—install additional build tools or use proot-distro Ubuntu chroot; no GPU—Termux lacks CUDA/OpenCL support; large tables—storage constraints on mobile. To uninstall: Remove the cloned or extracted directory. Optimal performance requires a desktop with significant storage and CPU/GPU resources for table generation and lookup.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Generate table: <code>rtgen hash_algorithm charset plaintext_len_min plaintext_len_max table_index chain_len chain_num -o table.rt</code>. Sort table: <code>rtsort table.rt</code>. Crack hash: <code>rcrack *.rt -h hash_value</code> or <code>rcrack *.rt -l hashlist.txt</code>. List supported hashes: <code>rcrack -h</code>. Use precomputed tables from public repositories (ethical use only on authorized hashes). Operate exclusively on data you own or have explicit written permission to analyze.</p>
+      <img src="https://project-rainbowcrack.com/images/rcrack_output.png" alt="RainbowCrack Lookup Output Example" class="img-fluid">
+
+      <h3>Detailed Tutorial: Cracking NTLM Hashes with Precomputed Rainbow Tables (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates using RainbowCrack with precomputed NTLM rainbow tables to recover plaintext passwords from captured NTLM hashes in a controlled lab environment (e.g., self-generated hashes from a test Windows system). This procedure is permitted only on data you own or for which you have explicit written authorization. Unauthorized password recovery is illegal.</p>
+      <ol>
+        <li>Obtain or generate test hashes: Create a test Windows account with a known weak password (e.g., "password123"). Extract NTLM hash using tools such as pwdump, secretsdump (Impacket), or Mimikatz in a lab VM (e.g., output format: user:rid:lmhash:nthash:::). Example NTLM hash: <code>8743b52063cd84097a65d1633f5c74f5</code> (NT hash of "password123"). Save to hashes.txt.</li>
+        <li>Acquire rainbow tables: Download precomputed NTLM tables for common character sets and lengths from public repositories (e.g., freerainbowtables project archives or trusted mirrors). For this example, assume you have alpha-numeric 1–8 character tables (e.g., ntlm_alpha-numeric#1-7_0_2400x10000000_*.rt). Place tables in the working directory. Note: Generating your own tables requires significant time and storage (hundreds of GB for comprehensive coverage).</li>
+        <li>Sort tables (if not already sorted): Run <code>rtsort ntlm_alpha-numeric#*.rt</code> for each table file. Sorted tables are required for lookup.</li>
+        <li>Perform lookup: Execute <code>rcrack *.rt -l hashes.txt</code> or <code>rcrack ntlm_*.rt -h 8743b52063cd84097a65d1633f5c74f5</code>. RainbowCrack searches the chains in the tables and outputs plaintext if a match is found (e.g., hex:8743b52063cd84097a65d1633f5c74f5 -> plaintext:password123).</li>
+        <li>Analyze results: If the password exists in the table coverage, recovery is near-instantaneous. If not found, the tool reports "not found" — indicating the password is outside the table parameters or uses a different charset/length.</li>
+        <li>Compare with online cracking: For educational purposes, contrast RainbowCrack speed with brute-force tools (e.g., Hashcat) on the same hash. RainbowCrack excels when tables exist; otherwise, it offers no advantage.</li>
+        <li>Document and remediate: Record findings responsibly. Recommend moving to modern hashing (bcrypt, Argon2, PBKDF2 with high iterations), enforcing complex password policies, and implementing multi-factor authentication to mitigate offline attacks.</li>
+      </ol>
+      <p>Expected results: Near-instant recovery of passwords covered by the tables; "not found" for uncovered passwords. Common issues: Missing tables—ensure correct charset/length coverage; large table sets—require substantial disk space; unsorted tables—always run rtsort first. RainbowCrack remains most useful for legacy unsalted hashes (LM/NTLM); modern salted algorithms render it ineffective without enormous custom tables.</p>
+      <img src="https://project-rainbowcrack.com/images/rtgen_usage.png" alt="Rainbow Table Generation Example (rtgen command)" class="img-fluid">
+      <p>For authoritative reference and downloads (tables and binaries), consult: <a href="https://project-rainbowcrack.com/" target="_blank">RainbowCrack Official Project Site</a>, <a href="https://project-rainbowcrack.com/table.htm" target="_blank">Free Rainbow Tables</a>, and the included documentation (README, usage.txt) in the source distribution.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

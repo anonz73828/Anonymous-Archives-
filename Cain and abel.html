@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - Cain & Abel (Historical Reference)</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-cainandabel">
+      <h2>Cain & Abel (Historical Reference Only)</h2>
+      <p>Cain & Abel was a multipurpose Windows security tool released in the early 2000s by Massimiliano Montoro (oxid.it). It combined password recovery, network sniffing, ARP poisoning, route table manipulation, hash cracking, VoIP decoding, and protocol analysis in a single graphical interface. While marketed for legitimate penetration testing and password auditing, it became notorious for its ease of use in unauthorized network attacks, credential theft, and man-in-the-middle operations. The project has been unmaintained since version 4.9.56 (circa 2014) and is detected as malware or a potentially unwanted program (PUP) by virtually all modern antivirus and endpoint detection solutions.</p>
+      <p><strong>Critical Legal and Ethical Notice:</strong> Cain & Abel is classified as malicious or high-risk software by security vendors. Possession, distribution, or use of Cain & Abel (or its variants) without explicit, written authorization from all affected system owners is illegal in most jurisdictions and may constitute unauthorized access, interception of communications, or computer fraud. This page provides no downloads, installation instructions, source code, or usage guidance. The content is intended solely for historical education, malware analysis, and defensive purposes in isolated research environments.</p>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Cain_and_Abel_interface.png/800px-Cain_and_Abel_interface.png" alt="Historical Cain & Abel Main Interface Screenshot (public malware analysis archive)" class="img-fluid">
+      <h3>Historical Capabilities (Defensive Awareness)</h3>
+      <p>Cain & Abel featured the following modules (observed in versions 4.x):</p>
+      <ul>
+        <li>Sniffer tab: Promiscuous packet capture and protocol dissection (HTTP, FTP, Telnet, etc.)</li>
+        <li>ARP poisoning (MITM) to intercept traffic on local networks</li>
+        <li>Password recovery from browser caches, Windows credential stores, LSA secrets, and hashes (LM/NTLM)</li>
+        <li>Hash cracking (MD5, SHA-1, NTLM, LM) using dictionary, brute-force, and rainbow table attacks</li>
+        <li>Route table and MAC address table manipulation</li>
+        <li>VoIP call decoding (RTP streams)</li>
+        <li>SQL MySQL/MS SQL password cracking via dictionary</li>
+      </ul>
+      <p>These capabilities made it popular among early 2000s attackers but also left numerous detectable artifacts (registry keys, driver installations, packet signatures, and process behavior).</p>
+      <h3>Detection and Mitigation (Defensive Focus)</h3>
+      <p>Modern security tools identify Cain & Abel through:</p>
+      <ul>
+        <li>Signature-based detection (known hashes, file names: cain.exe, abel.dll, winpcap dependency)</li>
+        <li>Behavioral indicators (ARP spoofing, promiscuous mode, unusual packet injection)</li>
+        <li>Network IOCs (gratuitous ARP replies, poisoned cache entries, suspicious DNS or HTTP traffic)</li>
+        <li>File artifacts (%ProgramFiles%\Cain, cain.exe in temp folders, modified drivers)</li>
+      </ul>
+      <p>Recommended defenses include disabling LM hash storage, enforcing strong NTLMv2, implementing network access control (NAC), deploying ARP spoofing detection (Dynamic ARP Inspection, port security), and using endpoint detection and response (EDR) solutions. Legacy Windows systems vulnerable to Cain-era attacks should be decommissioned or isolated.</p>
+      <img src="https://www.malwarebytes.com/blog/wp-content/uploads/2018/04/cain-arp-poisoning.png" alt="Example ARP Poisoning Detection (public security research)" class="img-fluid">
+
+      <h3>Educational Analysis Resources</h3>
+      <p>Reputable public sources providing historical and defensive analysis:</p>
+      <ul>
+        <li><a href="https://www.oxid.it/cain.html" target="_blank">Original oxid.it Project Page (archived, last update 2014)</a></li>
+        <li><a href="https://www.bleepingcomputer.com/virus-removal/remove-cain-and-abel" target="_blank">BleepingComputer: Cain & Abel Removal Guide</a></li>
+        <li><a href="https://www.malwarebytes.com/blog/threat-analysis/2012/03/cain-abel-password-recovery-tool" target="_blank">Malwarebytes: Historical Threat Analysis</a></li>
+        <li><a href="https://www.kb.cert.org/vuls/id/866856" target="_blank">CERT Vulnerability Note VU#866856 (related to password recovery risks)</a></li>
+        <li><a href="https://www.virustotal.com/gui/search/type:tag%20tag:cainandabel" target="_blank">VirusTotal tag:cainandabel (historical samples and detections)</a></li>
+      </ul>
+
+      <p><strong>Conclusion:</strong> Cain & Abel represents an important chapter in the history of dual-use security tools and the evolution of network attack techniques. Its widespread abuse highlighted the need for stronger authentication, network segmentation, and endpoint protection. Modern equivalents (both legitimate auditing tools and malicious variants) continue to exist; understanding Cain & Abel helps defenders recognize similar tactics, techniques, and procedures (TTPs) in contemporary threats.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

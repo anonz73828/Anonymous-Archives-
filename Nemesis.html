@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - Nemesis</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-nemesis">
+      <h2>Nemesis</h2>
+      <p>Nemesis is a command-line packet injection framework that enables the creation and transmission of custom packets with complete control over protocol headers, options, payloads, and fragmentation. Originally developed by Mark Grimes and maintained sporadically by the community, Nemesis supports a broad range of protocols including Ethernet, IP, TCP, UDP, ICMP, IGMP, RIP, OSPF, BGP, and GRE. It is particularly useful for low-level network protocol testing, crafting malformed or non-standard packets, validating firewall and IDS behavior, testing protocol implementations, and simulating attack traffic in authorized security research and penetration testing environments.</p>
+      <img src="https://packetstormsecurity.org/distfiles/nemesis/nemesis-screenshot.png" alt="Nemesis Command-Line Usage Example (historical)" class="img-fluid">
+      <h3>Uses</h3>
+      <p>Nemesis is employed in authorized network security testing to generate protocol-specific test packets, evaluate firewall rule processing, test IDS signature evasion techniques, perform path MTU discovery with custom fragmentation, simulate routing protocol advertisements, and validate TCP/IP stack robustness against malformed input. Example: Sending crafted OSPF hello packets with invalid checksums or BGP UPDATE messages with malformed attributes to observe target device behavior during controlled protocol fuzzing in a lab network.</p>
+      <h3>Installation in Termux</h3>
+      <p>Nemesis is not packaged in standard Termux repositories and requires compilation from source. Raw packet injection requires root privileges (use tsu or a rooted device). Installation steps:</p>
+      <pre><code>pkg update && pkg upgrade -y
+pkg install git build-essential libpcap-dev libdnet-dev libnet-dev -y
+git clone https://github.com/dugsong/nemesis.git
+cd nemesis
+./autogen.sh
+./configure --prefix=/data/data/com.termux/files/usr
+make
+make install
+# Test: nemesis -V
+# Note: If libdnet/libnet issues occur, install libdumbnet-dev and libnet1-dev equivalents or build them separately</code></pre>
+      <p>Common issues: Raw socket permission denied—run with root (tsu -c nemesis ...); missing libraries—ensure libpcap-dev, libdnet-dev, and libnet-dev are installed; autogen failure—install autoconf/automake/libtool. To uninstall: Remove the cloned directory and run make uninstall if supported. Full packet injection capabilities typically require a rooted device or Kali NetHunter environment.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Basic TCP packet: <code>nemesis tcp -S 192.168.1.100 -D 192.168.1.1 -p 80 -f S -c 1</code> (SYN packet). UDP with payload: <code>nemesis udp -S 10.0.0.1 -D 8.8.8.8 -p 53 -P payload.bin</code>. ICMP echo request: <code>nemesis icmp -S 192.168.1.100 -D 192.168.1.1 -i 8 -c 5</code>. OSPF hello packet: <code>nemesis ospf -v -S 192.168.1.1 -D 224.0.0.5 -a hello</code>. BGP UPDATE: <code>nemesis bgp -v -S 172.16.1.1 -D 172.16.1.2 -a update -A 65001 -N 192.168.0.0/16</code>. Always test on isolated lab networks with explicit written permission.</p>
+      <img src="https://packetstormsecurity.org/distfiles/nemesis/nemesis-tcp-example.png" alt="Nemesis TCP Packet Injection Example Output" class="img-fluid">
+
+      <h3>Detailed Tutorial: Testing Firewall Behavior with Custom TCP Packets (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates using Nemesis to send specially crafted TCP packets to evaluate firewall filtering, state tracking, and IDS response in a controlled lab environment (e.g., a local network with a test firewall or target system you own). This procedure is permitted only on networks and systems you control or for which you have explicit written authorization. Unauthorized packet injection is illegal and may be interpreted as a network attack.</p>
+      <ol>
+        <li>Prepare environment: Ensure Nemesis is compiled and installed. Confirm root access (tsu or su). Identify target IP (e.g., firewall at 192.168.1.1) and test port (e.g., 80). Verify lab isolation and permission.</li>
+        <li>Send standard SYN packet: Run <code>tsu -c "nemesis tcp -S 192.168.1.100 -D 192.168.1.1 -p 80 -f S -c 1 -v"</code>. Observe response (SYN/ACK from open port, RST from closed, no reply from filtered).</li>
+        <li>Test unusual flag combinations: Send SYN+FIN packet (invalid but sometimes bypasses naive filters):
+          <code>tsu -c "nemesis tcp -S 192.168.1.100 -D 192.168.1.1 -p 80 -f SF -c 1 -v"</code>
+        </li>
+        <li>Send large-payload TCP packet: Test fragmentation handling or buffer issues:
+          <code>tsu -c "nemesis tcp -S 192.168.1.100 -D 192.168.1.1 -p 80 -d 1400 -c 1 -v"</code>
+        </li>
+        <li>Inject packet with custom options (TCP timestamp): 
+          <code>tsu -c "nemesis tcp -S 192.168.1.100 -D 192.168.1.1 -p 80 -f S -O timestamp=123456789 -c 1 -v"</code>
+        </li>
+        <li>Send spoofed-source packet: Test anti-spoofing rules:
+          <code>tsu -c "nemesis tcp -a 8.8.8.8 -S 192.168.1.100 -D 192.168.1.1 -p 80 -f S -c 1 -v"</code>
+        </li>
+        <li>Monitor and analyze: Use tcpdump/Wireshark in parallel on the target or another host to capture Nemesis-generated packets. Review firewall/IDS logs for accepted/rejected/dropped packets, alerts on malformed options, or anti-spoofing events.</li>
+        <li>Document and recommend: Record packet types, flags, payloads, and target responses. Suggest improvements: strict stateful inspection, invalid flag drop rules, anti-spoofing ACLs, rate limiting, and logging of anomalous packets.</li>
+      </ol>
+      <p>Expected results: Precise control over sent packets with observable target behavior (accepted, rejected, dropped, or unexpected resets), validating firewall/IDS configuration effectiveness. Common issues: Packets dropped silently—target silently discards; spoofing ineffective—requires root and proper egress filtering disabled in lab; interface errors—verify correct -d device flag if needed.</p>
+      <img src="https://packetstormsecurity.org/distfiles/nemesis/nemesis-icmp-example.png" alt="Nemesis ICMP Packet Injection Example Output" class="img-fluid">
+      <p>For authoritative reference and source code, consult: <a href="https://packetstormsecurity.com/files/28165/nemesis-1.4beta3.tar.gz.html" target="_blank">Nemesis Project Page (Packet Storm – last stable release)</a>, <a href="https://github.com/dugsong/nemesis" target="_blank">Nemesis GitHub Mirror (Dugsong fork)</a>, and <a href="https://manpages.debian.org/testing/nemesis/nemesis.1.en.html" target="_blank">Nemesis Man Page (Debian)</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

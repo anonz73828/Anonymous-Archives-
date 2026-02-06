@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - Hashcat</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-hashcat">
+      <h2>Hashcat</h2>
+      <p>Hashcat is the world's fastest and most advanced open-source password recovery utility. It supports over 300 highly optimized hashing algorithms and five primary attack modes: straight dictionary, combination, brute-force (mask), hybrid, and rule-based attacks. Hashcat leverages CPU and GPU acceleration for maximum performance and is widely used in ethical password auditing, penetration testing, and security research.</p>
+      <img src="https://hashcat.net/wiki/lib/exe/fetch.php?media=hashcat.png" alt="Hashcat Benchmark and Status Output Example" class="img-fluid">
+      <h3>Uses</h3>
+      <p>Hashcat is employed for cracking hashed passwords recovered from various sources (e.g., system dumps, WPA handshakes, archives, or databases) during authorized security assessments. Example: Recovering weak passwords from a captured WPA/WPA2 handshake or testing NTLM hashes from a Windows SAM file to evaluate password policy strength.</p>
+      <h3>Installation in Termux</h3>
+      <p>Hashcat is not natively packaged in Termux due to its GPU dependencies and build complexity. Effective installation often requires a proot-distro (e.g., Ubuntu) environment or manual compilation. For CPU-only mode (limited performance on mobile devices):</p>
+      <pre><code>pkg update && pkg upgrade -y
+pkg install proot-distro -y
+proot-distro install ubuntu
+proot-distro login ubuntu
+# Inside Ubuntu chroot:
+apt update && apt upgrade -y
+apt install hashcat -y
+# Or compile from source (requires build-essential, OpenCL if GPU available):
+apt install git build-essential cmake ocl-icd-opencl-dev -y
+git clone https://github.com/hashcat/hashcat.git
+cd hashcat
+make
+# Run: ./hashcat --help</code></pre>
+      <p>Common issues: No GPU acceleration—Termux/Android lacks full OpenCL/CUDA support without root and compatible drivers; use CPU mode or transfer hashes to a desktop with GPU. For uninstall: Remove the proot-distro or source directory. Optimal performance requires a desktop/laptop with dedicated GPU.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Basic dictionary attack: <code>hashcat -m 0 -a 0 hash.txt wordlist.txt</code> (MD5 example). Show status: <code>hashcat --status</code>. List hash modes: <code>hashcat --help | grep WPA</code>. Attack WPA handshake: <code>hashcat -m 22000 capture.hc22000 wordlist.txt</code>. Always test only on authorized hashes from systems or networks you control or have explicit permission to audit.</p>
+      <img src="https://hashcat.net/wiki/lib/exe/fetch.php?media=hashcat_status.png" alt="Hashcat Cracking Progress and Recovered Password Example" class="img-fluid">
+
+      <h3>Detailed Tutorial: Cracking a WPA/WPA2 Handshake (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates recovering a WPA/WPA2 pre-shared key from a captured handshake using a dictionary attack. Perform this only in a controlled lab environment on your own access point or with explicit written permission. Unauthorized cracking of wireless networks is illegal.</p>
+      <ol>
+        <li>Obtain a valid handshake capture: Use tools like Aircrack-ng (airodump-ng + aireplay-ng) or hcxdumptool to capture WPA traffic into a .pcapng file, ensuring a full 4-way handshake is present.</li>
+        <li>Convert capture to Hashcat format: Use hcxpcapngtool (install via apt in proot-distro if needed): <code>hcxpcapngtool -o handshake.hc22000 capture.pcapng</code>. This produces a file in mode 22000 format (preferred since Hashcat v6.0.0).</li>
+        <li>Prepare a wordlist: Download or use a dictionary such as rockyou.txt (ensure it is in your working directory or provide full path).</li>
+        <li>Run dictionary attack: <code>hashcat -m 22000 handshake.hc22000 /path/to/rockyou.txt -O</code> (-O enables optimized kernels for better performance). Add --force if device detection issues occur on non-standard hardware.</li>
+        <li>Monitor progress: Hashcat displays real-time status (speed, progress, estimated time). If the key is in the wordlist, it outputs "Cracked" with the recovered passphrase (e.g., "Recovered......: Password123!").</li>
+        <li>Resume if interrupted: Hashcat auto-saves restore files; resume with <code>hashcat --restore</code>.</li>
+        <li>Verify and clean up: Test the recovered key against the AP. Remove sensitive files securely after testing. Document findings for password policy recommendations.</li>
+      </ol>
+      <p>Expected results: Successful recovery if the passphrase exists in the wordlist; otherwise, Hashcat exhausts candidates and reports "Exhausted." Common issues: Invalid hash format—verify conversion step; low speed—use a powerful GPU on desktop; large wordlists—add rules with -r best64.rule for variations.</p>
+      <img src="https://hashcat.net/wiki/lib/exe/fetch.php?media=hashcat_wpa_crack_example.png" alt="Hashcat WPA Handshake Cracking Output" class="img-fluid">
+      <p>For comprehensive reference, consult the official resources: <a href="https://hashcat.net/hashcat/" target="_blank">Hashcat Official Website</a>, <a href="https://hashcat.net/wiki/doku.php?id=cracking_wpawpa2" target="_blank">WPA/WPA2 Cracking Guide</a>, and <a href="https://github.com/hashcat/hashcat" target="_blank">GitHub Repository</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

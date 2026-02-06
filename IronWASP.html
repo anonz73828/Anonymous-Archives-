@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - IronWASP</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-ironwasp">
+      <h2>IronWASP</h2>
+      <p>IronWASP (Iron Web Application Security Tester) is a free, open-source web application security testing platform developed by Ajin Abraham. It provides a comprehensive graphical interface for intercepting, analyzing, and modifying HTTP/HTTPS traffic, performing automated vulnerability scanning, fuzzing, and manual security testing. IronWASP includes built-in modules for detecting common web vulnerabilities (SQL injection, XSS, file inclusion, command injection, etc.), session management testing, and active/passive scanning capabilities. It also supports custom scripting via IronPython and IronRuby, making it extensible for advanced users. While less actively maintained in recent years compared to OWASP ZAP or Burp Suite, IronWASP remains a valuable educational tool due to its integrated learning resources, vulnerability explanations, and focus on manual testing workflows.</p>
+      <img src="https://ironwasp.org/images/ironwasp-main-window.png" alt="IronWASP Main Interface with Proxy and Scanner Tabs" class="img-fluid">
+      <h3>Uses</h3>
+      <p>IronWASP is utilized in authorized web application penetration testing to intercept and manipulate traffic, perform automated vulnerability scanning, fuzz parameters, test for business logic flaws, and generate detailed reports. It is particularly useful in educational settings and for testers who prefer a single, all-in-one GUI platform with built-in vulnerability descriptions and remediation guidance. Example: Proxying browser traffic through IronWASP to map an application, run active scans for common injection flaws, and manually test session fixation or insecure direct object references in a controlled lab environment.</p>
+      <h3>Installation in Termux</h3>
+      <p>IronWASP is a .NET/Windows application requiring the Mono runtime for execution on Linux/Android. Full GUI operation in Termux requires proot-distro (Ubuntu) with X11/VNC forwarding. Steps:</p>
+      <pre><code>pkg update && pkg upgrade -y
+pkg install proot-distro -y
+proot-distro install ubuntu
+proot-distro login ubuntu
+# Inside Ubuntu chroot:
+apt update && apt upgrade -y
+apt install mono-complete wget unzip -y
+# Download latest release (check https://ironwasp.org/download.html for current version)
+wget https://ironwasp.org/IronWASP-Latest.zip
+unzip IronWASP-Latest.zip -d IronWASP
+cd IronWASP
+# Run GUI (requires X11/VNC): mono IronWASP.exe
+# For headless/automation (limited): mono IronWASP.exe --help</code></pre>
+      <p>Common issues: GUI not displaying—ensure VNC/X11 forwarding is configured; Mono compatibility—install mono-complete; certificate errors—manually export/import IronWASP root CA. To uninstall: Remove the proot-distro or extracted directory. Optimal performance and usability are achieved on a desktop Windows or Linux system.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Launch GUI: <code>mono IronWASP.exe</code>. Configure proxy: Tools → Proxy → Set browser to 127.0.0.1:8081. Install CA certificate: Tools → Certificates → Export Root CA → Import into browser trust store. Key tabs: Proxy (intercept/history), Scanner (active/passive), Fuzzer, Manual Testing, Vulnerabilities (with descriptions), and Reports. Start scan: Scanner → New Scan → Select scope → Start. Always test on authorized targets only.</p>
+      <img src="https://ironwasp.org/images/ironwasp-vulnerability-detail.png" alt="IronWASP Vulnerability Detail View with Remediation Guidance" class="img-fluid">
+
+      <h3>Detailed Tutorial: Proxy Interception and Vulnerability Scanning (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates using IronWASP to intercept traffic, build an application map, and perform automated vulnerability scanning against a deliberately vulnerable test application (e.g., DVWA, bWAPP, or WebGoat running in a local or lab VM you control). Perform all testing exclusively on systems you own or for which you have explicit written authorization. Unauthorized scanning or interception is illegal.</p>
+      <ol>
+        <li>Launch IronWASP: In the Ubuntu chroot (or desktop), run <code>mono IronWASP.exe</code>. Ensure X11/VNC is configured if using Termux emulation.</li>
+        <li>Configure browser proxy: Set your browser to manual proxy: HTTP/HTTPS 127.0.0.1 port 8081. Install IronWASP root CA certificate (Tools → Certificates → Export Root CA → Import into browser trust store).</li>
+        <li>Browse the target application: Navigate through the test app (e.g., http://localhost/dvwa) with proxy enabled. IronWASP passively logs all requests/responses and builds the site tree in the Proxy tab.</li>
+        <li>Explore and crawl: In the Proxy tab, review captured requests. Right-click the target host → Crawl Site to discover additional endpoints and parameters automatically.</li>
+        <li>Run active scan: Go to Scanner tab → New Scan → Select the crawled site/scope → Configure scan settings (default policy is suitable for lab) → Start Scan. IronWASP actively sends payloads to detect vulnerabilities (SQLi, XSS, LFI, etc.). Monitor progress in the Scanner tab.</li>
+        <li>Review findings: After scan completion, switch to Vulnerabilities tab. Browse findings by severity (High/Medium/Low). Click any issue for detailed description, proof-of-concept request/response, affected parameters, and remediation advice.</li>
+        <li>Manual testing (optional): In Proxy history, right-click a request → Send to Manual Testing. Modify parameters, headers, or body (e.g., test for IDOR by changing user IDs). Use Fuzzer tab to perform automated parameter fuzzing with payloads.</li>
+        <li>Generate report: Reports tab → Generate Report → Choose format (HTML recommended). Document findings, severity, evidence, and recommended fixes (e.g., parameterized queries, output encoding, secure session management).</li>
+      </ol>
+      <p>Expected results: Passive mapping of the application, active detection of common vulnerabilities with detailed explanations, and clear remediation guidance for each issue. Common issues: Scan timeouts—reduce scope or increase timeouts; false positives—manually verify high-severity findings; HTTPS issues—ensure CA certificate is trusted; JavaScript-heavy apps—use crawler with JavaScript execution if available.</p>
+      <img src="https://ironwasp.org/images/ironwasp-scan-progress.png" alt="IronWASP Active Scan Progress Window" class="img-fluid">
+      <p>For authoritative reference and resources, consult: <a href="https://ironwasp.org/" target="_blank">IronWASP Official Website</a>, <a href="https://ironwasp.org/download.html" target="_blank">Download Page</a>, <a href="https://ironwasp.org/documentation.html" target="_blank">Official Documentation</a>, <a href="https://github.com/ironwasp/IronWASP" target="_blank">GitHub Repository (legacy)</a>, and <a href="https://owasp.org/www-project-web-security-testing-guide/" target="_blank">OWASP Web Security Testing Guide (complementary)</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - ophCrack</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-ophcrack">
+      <h2>ophCrack</h2>
+      <p>ophCrack is a free, open-source Windows password recovery tool that employs Philippe Oechslin's time-memory trade-off technique via rainbow tables to crack LM (LAN Manager) and NTLM password hashes. Developed by the ophcrack project team, it gained popularity in the mid-2000s for its ability to recover legacy LM hashes (used in Windows up to XP/2003) in minutes when appropriate tables are available. While still functional for historical analysis, ophCrack is largely obsolete today due to the deprecation of LM hashing, the widespread adoption of salted NTLMv2, and modern defenses such as Kerberos and pass-the-hash mitigation. This page is provided solely for educational and defensive purposes: to illustrate the risks of legacy hashing and the value of strong credential storage practices.</p>
+      <p><strong>Critical Legal and Ethical Notice:</strong> ophCrack must only be used on password hashes you own or have explicit, written authorization to analyze. Unauthorized recovery of credentials from any system constitutes illegal access and may result in criminal liability. No download links, active exploitation instructions, or table distribution are provided here.</p>
+      <img src="https://ophcrack.sourceforge.io/images/ophcrack.png" alt="ophCrack Graphical Interface (historical screenshot)" class="img-fluid">
+      <h3>Historical Capabilities (Defensive Awareness)</h3>
+      <p>ophCrack's primary features included:</p>
+      <ul>
+        <li>Import of SAM hashes from local Windows systems, NTDS.dit extracts, pwdump files, or shadow copies</li>
+        <li>Precomputed rainbow tables for LM (fast) and NTLM (much slower/larger tables)</li>
+        <li>Graphical interface showing real-time cracking progress, cracked passwords, and hash status</li>
+        <li>Support for free small tables (alphanumeric 1–7 chars) and paid/extended tables for higher coverage</li>
+        <li>Basic audit reporting of cracked vs. uncracked accounts</li>
+      </ul>
+      <p>Its effectiveness relied heavily on LM hash weaknesses (uppercase-only, split into two 7-char halves, unsalted) and the availability of tables.</p>
+      <h3>Detection and Mitigation (Defensive Focus)</h3>
+      <p>Modern systems are largely immune to ophCrack-style attacks through:</p>
+      <ul>
+        <li>Disabling LM hash storage (default since Windows Vista)</li>
+        <li>Enforcing NTLMv2 only (via Group Policy: Network security: LAN Manager authentication level)</li>
+        <li>Using salted, iterated hashing (bcrypt, Argon2) for local accounts</li>
+        <li>Implementing Credential Guard (Windows 10/11 Enterprise) to protect NTLM hashes in memory</li>
+        <li>Monitoring for unauthorized extraction tools (secretsdump, pwdump, Mimikatz)</li>
+      </ul>
+      <p>Any remaining LM hashes on legacy systems should be considered fully compromised. Organizations should migrate to modern authentication (Kerberos, FIDO2, passkeys) and audit for legacy protocol exposure.</p>
+      <img src="https://ophcrack.sourceforge.io/images/ophcrack_cracking.png" alt="ophCrack Cracking Progress Example (historical)" class="img-fluid">
+
+      <h3>Educational Analysis Resources</h3>
+      <p>Reputable public sources for historical and defensive study:</p>
+      <ul>
+        <li><a href="https://ophcrack.sourceforge.io/" target="_blank">ophCrack Official Project Page (SourceForge – archived)</a></li>
+        <li><a href="https://ophcrack.sourceforge.io/tables.php" target="_blank">Free Rainbow Tables (small sets only – historical)</a></li>
+        <li><a href="https://www.l0phtcrack.com/lm-hash.html" target="_blank">L0phtCrack / ophCrack LM Hash Weaknesses Explanation</a></li>
+        <li><a href="https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-security-lan-manager-authentication-level" target="_blank">Microsoft: Disable LM Hash Storage and Enforce NTLMv2</a></li>
+        <li><a href="https://attack.mitre.org/techniques/T1003/002/" target="_blank">MITRE ATT&CK: OS Credential Dumping – Security Account Manager (includes legacy tools context)</a></li>
+      </ul>
+
+      <h3>Conclusion</h3>
+      <p>ophCrack serves as a valuable historical case study demonstrating the catastrophic weakness of unsalted, truncated, case-insensitive password hashing. Its effectiveness against LM hashes helped drive the deprecation of LM in modern Windows environments and the adoption of stronger credential storage practices. Today, the tool’s primary educational value lies in understanding time-memory trade-offs, the importance of salted and iterated hashing algorithms, and the ongoing need to eliminate legacy authentication protocols from enterprise networks.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

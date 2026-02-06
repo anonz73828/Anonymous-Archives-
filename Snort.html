@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - Snort</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-snort">
+      <h2>Snort</h2>
+      <p>Snort is an open-source network intrusion detection and prevention system (IDS/IPS) originally developed by Martin Roesch and now maintained by Cisco. It performs real-time analysis of network traffic, protocol inspection, content matching, and anomaly detection using a powerful rule-based language. Snort operates in three primary modes: sniffer (packet logging), logger (detailed logging), and NIDS/NIPS (intrusion detection/prevention). It supports inline IPS mode, reputation-based filtering, and integration with tools such as Barnyard2, PulledPork, and Snorby for rule management and visualization. Snort is widely used in ethical security operations for monitoring, alerting on malicious activity, and forensic analysis.</p>
+      <img src="https://www.snort.org/assets/images/snort_logo.png" alt="Snort Logo" class="img-fluid">
+      <h3>Uses</h3>
+      <p>Snort is employed in authorized network security monitoring to detect known attack signatures, policy violations, malware communication, exploit attempts, and anomalous traffic patterns. Example: Deploying Snort in IDS mode on a lab network to detect port scans, SQL injection attempts, or command-and-control traffic generated during controlled penetration testing, thereby validating defensive monitoring capabilities and tuning rules for reduced false positives.</p>
+      <h3>Installation in Termux</h3>
+      <p>Snort is not available as a pre-built package in Termux repositories and requires compilation from source. Full functionality (especially inline IPS and packet capture) often requires root privileges and a compatible network interface. Installation steps:</p>
+      <pre><code>pkg update && pkg upgrade -y
+pkg install git build-essential autoconf automake libtool pkg-config libpcap libpcre libdumbnet libdaq-dev flex bison zlib-dev libluajit-5.1-dev -y
+# Clone latest stable release
+git clone https://github.com/snort3/snort3.git
+cd snort3
+./configure_cmake.sh --prefix=/data/data/com.termux/files/usr
+cd build
+make -j$(nproc)
+make install
+# Verify: snort --version
+# Optional: Download community rules
+wget https://www.snort.org/downloads/community/snort3-community-rules.tar.gz
+tar -xzf snort3-community-rules.tar.gz -C /data/data/com.termux/files/usr/etc/snort/rules</code></pre>
+      <p>Common issues: libdaq/libdnet not found—install manually or use --disable-daq; permission errors on interfaces—run with root (tsu/su); rule path misconfiguration—edit /data/data/com.termux/files/usr/etc/snort/snort.lua. To uninstall: Remove the build directory and run make uninstall if supported. Optimal deployment occurs on dedicated Linux systems or Kali NetHunter for inline IPS and high-performance capture.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Basic IDS mode: <code>snort -c /path/to/snort.lua -i wlan0 -A console</code>. Packet logging: <code>snort -c snort.lua -i eth0 -l /tmp/log -k none</code>. Inline IPS (requires DAQ): <code>snort -c snort.lua --daq afpacket -i eth0:eth1 -Q</code>. Test rule: <code>snort -c snort.lua --dump-rule-stats</code>. Update rules: Use PulledPork or manually download community/emerging threats rulesets. Always monitor authorized networks only.</p>
+      <img src="https://blog.snort.org/images/snort3-console-alert.png" alt="Snort Console Alert Output Example" class="img-fluid">
+
+      <h3>Detailed Tutorial: Basic IDS Setup and Custom Rule Detection (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates configuring Snort in IDS mode, loading community rules, creating a custom detection rule, and triggering an alert in a controlled lab environment (e.g., a local network with test VMs you own). This procedure is permitted only on networks and systems you control or for which you have explicit written authorization. Unauthorized network monitoring is illegal in many jurisdictions.</p>
+      <ol>
+        <li>Prepare environment: Ensure Snort is compiled and installed. Copy community rules to <code>/data/data/com.termux/files/usr/etc/snort/rules</code>. Create basic configuration if needed: copy <code>snort.lua</code> from source extras and adjust HOME_NET and EXTERNAL_NET variables.</li>
+        <li>Start Snort in IDS mode: Run <code>snort -c /data/data/com.termux/files/usr/etc/snort/snort.lua -i wlan0 -A console -k none</code>. This enables console alerting and disables checksum validation (useful in lab).</li>
+        <li>Generate test traffic: From another device on the same network, run a simple port scan (e.g., <code>nmap -sS 192.168.1.100</code>) or attempt a known exploit pattern (e.g., send a string containing "sqlmap" or "union select" in HTTP requests to a test web server).</li>
+        <li>Observe alerts: Snort should display real-time alerts in console (e.g., "[1:1000001:1] COMMUNITY WEB SERVER sql injection attempt"). Community rules detect common attack patterns; alerts include SID, message, source/destination IP/port, and protocol.</li>
+        <li>Create custom rule (lab only): Edit or create a local rules file (e.g., <code>local.rules</code> in the rules directory):
+          <code>alert tcp any any -> $HOME_NET 80 (msg:"Custom Test Alert - Suspicious User-Agent"; content:"Mozilla/5.0 (compatible; TestBot)"; http_header; sid:10000001; rev:1;)</code>
+          Include in snort.lua: <code>ips = { include = 'local.rules' }</code>.
+        </li>
+        <li>Trigger custom rule: From a browser or curl, send a request with the matching User-Agent:
+          <code>curl -A "Mozilla/5.0 (compatible; TestBot)" http://192.168.1.100</code>
+          Snort logs the custom alert.
+        </li>
+        <li>Analyze and document: Review console output or unified2 logs (configure output in snort.lua). Document detected patterns, rule effectiveness, and false-positive rate. Recommend tuning (suppression lists, rate filters) and integration with SIEM for production use.</li>
+      </ol>
+      <p>Expected results: Real-time console alerts for detected scans, exploits, or custom patterns, validating Snort's detection capabilities. Common issues: No alerts—verify HOME_NET, interface, and rule inclusion; high false positives—use threshold/suppression rules; performance—limit rule set or use hardware acceleration where available.</p>
+      <img src="https://blog.snort.org/images/snort3-rule-example.png" alt="Example Snort Rule Syntax and Alert Structure" class="img-fluid">
+      <p>For authoritative reference and resources, consult: <a href="https://www.snort.org/" target="_blank">Snort Official Website</a>, <a href="https://www.snort.org/downloads" target="_blank">Downloads and Documentation</a>, <a href="https://blog.snort.org/" target="_blank">Snort Blog (Rule Writing, Best Practices)</a>, <a href="https://github.com/snort3/snort3" target="_blank">Snort 3 GitHub Repository</a>, and <a href="https://www.snort.org/community-rules" target="_blank">Community Ruleset</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - John the Ripper</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-johntheripper">
+      <h2>John the Ripper</h2>
+      <p>John the Ripper is an open-source password security auditing and recovery tool developed by Openwall. It supports a wide range of hash types and ciphers, with the "jumbo" community edition offering hundreds of additional formats and optimizations for CPU and GPU cracking. It excels in offline password recovery from sources such as /etc/shadow files, Windows SAM dumps, password-protected archives, and more.</p>
+      <img src="https://www.openwall.com/john/images/john-the-ripper-logo.png" alt="John the Ripper Logo" class="img-fluid">
+      <h3>Uses</h3>
+      <p>John the Ripper is used for ethical password strength evaluation, detecting weak credentials in system dumps or files during authorized penetration testing and security audits. Example: Cracking unsalted MD5 hashes or testing Unix shadow passwords with wordlists to assess policy compliance and recommend improvements.</p>
+      <h3>Installation in Termux</h3>
+      <p>John the Ripper (jumbo edition recommended) requires compilation from source in Termux, as pre-built packages are not standard. Use the following steps:</p>
+      <pre><code>pkg update && pkg upgrade -y
+pkg install git build-essential clang make libssl-dev zlib-dev -y
+git clone https://github.com/openwall/john.git
+cd john/src
+./configure && make -s clean && make -sj4
+cd ../run
+# Test: ./john --help
+# Alternative one-liner installer script (verify source first):
+pkg install wget -y && wget https://raw.githubusercontent.com/shahriarkabir-sagor/Termux-JohnTheRipper-Installer/master/jtr-installer.sh && chmod +x jtr-installer.sh && ./jtr-installer.sh</code></pre>
+      <p>Common issues: Compilation errors—install missing devel packages; limited performance—Termux uses CPU only (no full GPU support). To uninstall: Remove the cloned directory. For optimal speed, use a desktop environment with GPU acceleration.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Basic usage: <code>./john hashes.txt</code> (auto-detects mode/format). Wordlist mode: <code>./john --wordlist=rockyou.txt hashes.txt</code>. Show cracked passwords: <code>./john --show hashes.txt</code>. Incremental mode: <code>./john --incremental hashes.txt</code>. Format specification: <code>./john --format=raw-md5 hashes.txt</code>. Always apply to authorized data only.</p>
+      <img src="https://www.openwall.com/john/images/john-cracking.png" alt="John the Ripper Cracking Progress Example" class="img-fluid">
+
+      <h3>Detailed Tutorial: Wordlist Attack on MD5 Hashes (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates cracking unsalted MD5 password hashes using a dictionary attack in a controlled lab (e.g., self-generated test hashes). Perform this exclusively on data you own or have explicit written permission to analyze. Unauthorized password recovery is illegal.</p>
+      <ol>
+        <li>Prepare test hashes: Create a file (e.g., hashes.txt) with MD5 hashes. Example content (one per line): <code>5f4dcc3b5aa765d61d8327deb882cf99</code> (MD5 of "password"). Use tools like unshadow for real /etc/passwd + /etc/shadow combos: <code>unshadow passwd shadow > hashes.txt</code>.</li>
+        <li>Navigate to run directory: <code>cd ~/john/run</code> (or wherever compiled).</li>
+        <li>Run wordlist attack: <code>./john --wordlist=/path/to/rockyou.txt --format=raw-md5 hashes.txt</code>. John auto-detects if format omitted in many cases.</li>
+        <li>Monitor progress: John displays status (guesses per second, ETA). Press any key for interim status or Ctrl+C to pause/resume.</li>
+        <li>View cracked results: <code>./john --show --format=raw-md5 hashes.txt</code>. Output reveals cracked pairs (e.g., ?:password for the example hash).</li>
+        <li>Resume session: Re-run the same command—John resumes from potfile (cracked hashes saved in ~/.john/john.pot).</li>
+        <li>Advanced: Add rules for mangling: <code>./john --wordlist=rockyou.txt --rules hashes.txt</code>. For incremental brute-force: <code>./john --incremental=All hashes.txt</code>.</li>
+        <li>Clean up and report: Securely delete sensitive files post-test. Document weak passwords and advocate for stronger hashing (e.g., bcrypt, Argon2) and policies.</li>
+      </ol>
+      <p>Expected results: Rapid cracking of common/weak passwords if in the wordlist; longer times for complex ones. Common issues: Format mismatch—specify --format; slow on mobile CPU—limit scope or use desktop. Compare to Hashcat for GPU-accelerated scenarios (John excels in CPU and certain formats).</p>
+      <img src="https://www.esecurityplanet.com/wp-content/uploads/2025/09/john-the-ripper-output.png" alt="John the Ripper Show Cracked Passwords Example" class="img-fluid">
+      <p>For authoritative reference, consult the official site: <a href="https://www.openwall.com/john/" target="_blank">Openwall John the Ripper</a>, <a href="https://github.com/openwall/john" target="_blank">GitHub Repository</a>, and documentation at <a href="https://www.openwall.com/john/doc/" target="_blank">John Documentation</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

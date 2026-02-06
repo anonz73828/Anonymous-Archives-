@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - ngrep</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-ngrep">
+      <h2>ngrep</h2>
+      <p>ngrep (network grep) is a lightweight, pcap-based packet inspection tool that allows users to search for regular expressions, hexadecimal patterns, or literal strings directly within live network traffic or pre-captured pcap files. Developed by Jordan Ritter, ngrep combines the packet capture capabilities of tcpdump with the pattern-matching power of grep, making it exceptionally useful for quick, targeted analysis of network content. It supports BPF filters for capture scoping, case-insensitive searching, payload-only matching, and colorized output. ngrep is widely used in ethical network troubleshooting, forensic analysis, and security testing when rapid identification of specific strings (e.g., credentials, commands, or attack signatures) is required.</p>
+      <img src="https://www.packetstormsecurity.org/distfiles/ngrep/ngrep-screenshot.png" alt="ngrep Command-Line Output Example with Matched Packets" class="img-fluid">
+      <h3>Uses</h3>
+      <p>ngrep is employed in authorized network security assessments to search for sensitive data leakage (e.g., cleartext passwords in HTTP/FTP/Telnet), detect command-and-control patterns, identify exploit payloads, troubleshoot application-layer issues, and perform ad-hoc forensic searches in captured traffic. Example: Monitoring a lab network for the appearance of specific strings (e.g., "password=" in HTTP POST requests) or detecting known malicious payloads during controlled penetration testing.</p>
+      <h3>Installation in Termux</h3>
+      <p>ngrep is available in some Termux repositories or can be compiled from source. Raw packet capture requires root privileges (use tsu or rooted device). Installation options:</p>
+      <pre><code>pkg update && pkg upgrade -y
+# Option 1: Install from repository (if available)
+pkg install ngrep -y
+# Option 2: Compile from source (recommended for latest version)
+pkg install git build-essential libpcap-dev -y
+git clone https://github.com/jpr5/ngrep.git
+cd ngrep
+./bootstrap
+./configure --with-pcap-includes=/data/data/com.termux/files/usr/include --with-pcap-libraries=/data/data/com.termux/files/usr/lib
+make
+make install
+# Test: ngrep -V</code></pre>
+      <p>Common issues: Permission denied on interfaces—run with root (tsu -c ngrep ...); libpcap not found—ensure pkg install libpcap-dev; color output missing—terminal must support ANSI colors. To uninstall: Remove the cloned directory and run make uninstall if supported. Full capture capabilities often require a rooted device or Kali NetHunter.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Basic search: <code>ngrep -d wlan0 'password'</code> (searches for "password" on wlan0). Case-insensitive: <code>ngrep -i 'pass'</code>. Hex pattern: <code>ngrep -X 'deadbeef'</code>. BPF filter: <code>ngrep -d any 'user' port 80</code>. Show only payload: <code>ngrep -q -O -</code>. Save matching packets: <code>ngrep -O capture.pcap 'sqlmap'</code>. Read from pcap: <code>ngrep -I capture.pcap 'string'</code>. Always capture or search on networks you own or have explicit written permission to access.</p>
+      <img src="https://www.kali.org/tools/ngrep/images/ngrep-usage.png" alt="ngrep Usage Example with Regular Expression Matching" class="img-fluid">
+
+      <h3>Detailed Tutorial: Searching for Cleartext Credentials in Live Traffic (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates using ngrep to search for sensitive strings (e.g., cleartext credentials) in live network traffic on a controlled lab network (e.g., a local subnet with test VMs or devices you own). This procedure is permitted only on networks and systems you control or for which you have explicit written authorization. Unauthorized interception or monitoring of network traffic is illegal in many jurisdictions.</p>
+      <ol>
+        <li>Prepare environment: Ensure ngrep is installed and you have root access (tsu or su). Identify the network interface with <code>ifconfig</code> or <code>ip link</code> (e.g., wlan0). Confirm you are on the target subnet or have routing permission.</li>
+        <li>Start basic credential search: Run <code>tsu -c "ngrep -d wlan0 -i 'pass|user|login|password'"</code>. This performs a case-insensitive search for common credential-related strings across all protocols on wlan0. ngrep displays matching packets in real time with timestamp, source/destination IP/port, and payload snippet.</li>
+        <li>Generate test traffic: On a test client device, perform actions that send cleartext credentials (e.g., HTTP Basic Auth login to a lab web server, FTP anonymous login, or Telnet session). Example:
+          <code>curl -u testuser:password123 http://192.168.1.100</code>
+        </li>
+        <li>Observe matches: ngrep should immediately highlight packets containing "password123", "testuser", or similar strings, showing protocol headers and payload context (e.g., Authorization: Basic dGVzdHVzZXI6cGFzc3dvcmQxMjM=). Press Ctrl+C to stop capture.</li>
+        <li>Refine with BPF filter: Limit to HTTP traffic only:
+          <code>tsu -c "ngrep -d wlan0 -i 'pass' 'tcp port 80 or tcp port 8080'"</code>
+        </li>
+        <li>Save matching packets for analysis: Capture only matching packets to pcap:
+          <code>tsu -c "ngrep -d wlan0 -O credentials.pcap -i 'password'"</code>
+          Later inspect with Wireshark or tcpdump: <code>tcpdump -r credentials.pcap</code>.
+        </li>
+        <li>Analyze and document: Review captured output or pcap file for sensitive data leakage. Document findings responsibly (e.g., cleartext transmission of credentials). Recommend defenses: enforce HTTPS (HSTS), disable insecure protocols (Telnet/FTP/Basic Auth), implement network segmentation, and deploy DLP or IDS rules to detect similar patterns.</li>
+      </ol>
+      <p>Expected results: Immediate, grep-like matches in live traffic whenever the specified strings appear in packet payloads, with clear context showing source, destination, and protocol. Common issues: No output—verify interface, root privileges, and traffic generation; encrypted traffic—ngrep cannot match inside TLS payloads unless decrypted; high traffic volume—use BPF filters to reduce noise.</p>
+      <img src="https://www.kali.org/tools/ngrep/images/ngrep-credential-match.png" alt="ngrep Output Showing Captured Credential in HTTP Traffic" class="img-fluid">
+      <p>For authoritative reference and source code, consult: <a href="https://github.com/jpr5/ngrep" target="_blank">ngrep GitHub Repository</a>, <a href="https://github.com/jpr5/ngrep/blob/master/README.md" target="_blank">Official README and Usage Examples</a>, and <a href="https://manpages.debian.org/testing/ngrep/ngrep.8.en.html" target="_blank">Man Page Documentation</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

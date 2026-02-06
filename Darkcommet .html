@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - DarkComet (Historical Reference)</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-darkcomet">
+      <h2>DarkComet (Historical Reference Only)</h2>
+      <p>DarkComet was a Remote Access Tool (RAT) developed by Jean-Pierre Lesueur (known online as DarkCoderSc) between approximately 2008 and 2012. Initially marketed as a legitimate remote administration utility, it gained notoriety due to its extensive use by malicious actors for unauthorized access, surveillance, data exfiltration, and persistence on victim systems. The project was officially discontinued by its author in 2012 following public exposure of its abuse in high-profile cyber-espionage and cybercrime campaigns. This page exists solely for educational and defensive purposes: to aid security professionals, malware analysts, and defenders in understanding RAT functionality, persistence mechanisms, detection signatures, and mitigation strategies.</p>
+      <p><strong>Important Legal and Ethical Notice:</strong> DarkComet is classified as malware by virtually all reputable antivirus vendors and security organizations. Possession, distribution, or deployment of DarkComet (or its variants) without explicit, written authorization from all affected system owners is illegal in most jurisdictions and constitutes unauthorized access, computer fraud, or espionage. This resource provides no downloads, installation instructions, source code, or operational guidance. Any attempt to acquire or use DarkComet outside of legitimate malware research in isolated, air-gapped laboratory environments may result in criminal liability.</p>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/DarkComet_RAT_interface_screenshot.png/800px-DarkComet_RAT_interface_screenshot.png" alt="Historical DarkComet RAT Control Panel Screenshot (public domain / malware analysis archive)" class="img-fluid">
+      <h3>Historical Capabilities (Defensive Awareness)</h3>
+      <p>DarkComet featured a modular client-server architecture with the following documented capabilities (observed in samples from 2010–2012 era):</p>
+      <ul>
+        <li>Remote desktop viewing and control</li>
+        <li>Keylogging and clipboard capture</li>
+        <li>File manager (upload/download, execute, delete)</li>
+        <li>Password recovery from browsers and applications</li>
+        <li>Webcam and microphone access</li>
+        <li>Registry and process manipulation</li>
+        <li>DDNS integration and port forwarding</li>
+        <li>Anti-VM/sandbox detection and persistence mechanisms (startup entries, scheduled tasks, service installation)</li>
+        <li>Customizable server builder with basic obfuscation</li>
+      </ul>
+      <p>These features made it attractive to threat actors but also left numerous detectable artifacts (registry keys, file paths, network beacons, mutexes, and specific strings).</p>
+      <h3>Detection and Mitigation (Defensive Focus)</h3>
+      <p>Modern endpoint detection tools identify DarkComet through:</p>
+      <ul>
+        <li>Signature-based detection (known hashes, YARA rules)</li>
+        <li>Behavioral indicators (unusual process injection, screen capture APIs, keylogging hooks)</li>
+        <li>Network IOCs (default ports 160, 81, 8080; C2 domains; specific HTTP user-agents or packet patterns)</li>
+        <li>File artifacts (e.g., %AppData%\DarkComet, specific .ini or .key files)</li>
+      </ul>
+      <p>Recommended defenses include application whitelisting, least-privilege accounts, network segmentation, EDR/XDR monitoring, and regular patching. Legacy systems vulnerable to DarkComet-era exploits should be decommissioned or isolated.</p>
+      <img src="https://www.malwarebytes.com/blog/wp-content/uploads/2018/04/darkcomet-yara-rules.png" alt="Example YARA Rule Detection for DarkComet (public malware research)" class="img-fluid">
+
+      <h3>Educational Analysis Resources</h3>
+      <p>The following publicly available, reputable sources provide detailed technical breakdowns and IOCs for defensive and research purposes only:</p>
+      <ul>
+        <li><a href="https://www.malwarebytes.com/blog/threat-analysis/2012/06/you-dont-want-darkcomet-on-your-network" target="_blank">Malwarebytes: You Don't Want DarkComet on Your Network (2012)</a></li>
+        <li><a href="https://www.secureworks.com/research/threat-profiles/darkcomet" target="_blank">Secureworks CTU: DarkComet Analysis</a></li>
+        <li><a href="https://blog.malwarebytes.com/threat-analysis/2018/04/darkcomet-rat-reborn/" target="_blank">Malwarebytes: DarkComet RAT Reborn (2018 follow-up)</a></li>
+        <li><a href="https://github.com/Neo23x0/signature-base/blob/master/yara/thor-hacktools.yar" target="_blank">YARA Rules including DarkComet signatures (signature-base repo)</a></li>
+        <li><a href="https://www.virustotal.com/gui/search/type:tag%20tag:darkcomet" target="_blank">VirusTotal tag:darkcomet (historical samples and detections)</a></li>
+      </ul>
+      <p>Researchers conducting malware analysis must use isolated, air-gapped environments and comply with all applicable laws and institutional policies.</p>
+
+      <p><strong>Conclusion:</strong> DarkComet serves as an important case study in the evolution of RATs, the risks of dual-use tools, and the importance of proactive defense. Modern equivalents (both legitimate remote administration software and malicious RATs) continue to exist; understanding DarkComet helps defenders recognize similar tactics, techniques, and procedures (TTPs) today.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

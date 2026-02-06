@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - Bettercap</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-bettercap">
+      <h2>Bettercap</h2>
+      <p>Bettercap is a powerful, modern, and actively maintained Swiss-army-knife framework for network reconnaissance, man-in-the-middle (MITM) attacks, traffic manipulation, and wireless auditing. Written in Go by Simone Margaritelli (evilsocket), it supports Ethernet, Wi-Fi, Bluetooth Low Energy (BLE), and HID attacks, with an extensive module ecosystem for sniffing, spoofing, proxying, injection, and more. Bettercap is widely regarded as a more performant, modular, and up-to-date alternative to legacy tools such as Ettercap, arpspoof, and dnsspoof. It is commonly used in authorized red team engagements, network security assessments, and wireless penetration testing.</p>
+      <img src="https://www.bettercap.org/assets/images/bettercap-ui-screenshot.png" alt="Bettercap Web UI – Dashboard and Module Overview" class="img-fluid">
+      <h3>Uses</h3>
+      <p>Bettercap is employed in ethical penetration testing to perform network reconnaissance, conduct MITM attacks (ARP/DNS spoofing), intercept and manipulate cleartext and SSL traffic (via HTTPS downgrade or HSTS bypass techniques), sniff credentials, inject JavaScript, and audit wireless networks. Example: Performing ARP spoofing on a local network to intercept HTTP/HTTPS traffic, downgrade connections, and harvest credentials during an authorized red team exercise in a controlled lab environment.</p>
+      <h3>Installation in Termux</h3>
+      <p>Bettercap provides pre-built static binaries for Android/arm64, making installation straightforward in Termux. Root is required for most network manipulation modules (use tsu or rooted device). Steps:</p>
+      <pre><code>pkg update && pkg upgrade -y
+pkg install wget -y
+# Download latest stable release for arm64 (check https://www.bettercap.org/releases/ for current version)
+wget https://github.com/bettercap/bettercap/releases/download/v2.32.0/bettercap_linux_arm64_v2.32.0.zip
+unzip bettercap_linux_arm64_v2.32.0.zip
+chmod +x bettercap
+mv bettercap $PREFIX/bin/
+# Optional: Install capstone for disassembly support
+pkg install capstone -y
+# Test: bettercap -h
+# Run with root: tsu -c bettercap</code></pre>
+      <p>Common issues: Permission denied on interfaces—run with root (tsu/su); no monitor mode for Wi-Fi—requires compatible USB adapter and drivers; capstone missing—some modules require it. To uninstall: Remove the binary from $PREFIX/bin. Full capabilities (especially wireless and packet injection) often require Kali NetHunter or a rooted device with appropriate hardware.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Launch interactive mode: <code>bettercap -iface wlan0</code>. Web UI: <code>bettercap -iface eth0 -caplet http-ui</code> (access http://<ip>:80). Key commands: net.probe on, net.show, arp.spoof on, set arp.spoof.targets 192.168.1.50, http.proxy on, https.proxy on, set http.proxy.sslstrip true. Modules: wifi.recon on, ble.recon on, hid.attack, dns.spoof. Always operate on networks and systems you own or have explicit written permission to test.</p>
+      <img src="https://www.bettercap.org/assets/images/bettercap-terminal-modules.png" alt="Bettercap Terminal – Active Modules and Events" class="img-fluid">
+
+      <h3>Detailed Tutorial: ARP Spoofing + HTTP/HTTPS Traffic Interception (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates using Bettercap to perform ARP spoofing and intercept HTTP/HTTPS traffic in a controlled lab environment (e.g., a local network with test VMs or devices you own). This procedure is permitted only on networks and systems you control or for which you have explicit written authorization. Unauthorized interception or manipulation of network traffic is illegal.</p>
+      <ol>
+        <li>Prepare environment: Ensure Bettercap is installed and you have root access (tsu or su). Identify your interface (e.g., wlan0) and target IP (e.g., victim 192.168.1.50, gateway 192.168.1.1). Enable IP forwarding if needed: <code>echo 1 > /proc/sys/net/ipv4/ip_forward</code>.</li>
+        <li>Launch Bettercap: Run <code>tsu -c "bettercap -iface wlan0"</code> to start interactive session on the desired interface.</li>
+        <li>Discover hosts: Type <code>net.probe on</code> then <code>net.show</code> to populate the host list. Identify victim and gateway MAC/IP pairs.</li>
+        <li>Configure ARP spoofing: Set targets <code>set arp.spoof.targets 192.168.1.50</code> (or comma-separated list), enable full-duplex spoofing <code>set arp.spoof.fullduplex true</code>, and start <code>arp.spoof on</code>. Bettercap begins poisoning ARP tables.</li>
+        <li>Enable proxy modules: Start HTTP proxy <code>http.proxy on</code>, HTTPS proxy <code>https.proxy on</code>, and optional SSL stripping <code>set http.proxy.sslstrip true</code> (attempts to downgrade HTTPS to HTTP where possible). Optionally enable JavaScript injection: <code>js.inject on</code>.</li>
+        <li>Monitor intercepted traffic: Use <code>net.sniff on</code> to see cleartext credentials, cookies, and POST data. Access web UI (http://localhost:80) for graphical view of events, packets, and hooked browsers (if using BeEF integration).</li>
+        <li>Execute advanced actions (lab only): Try <code>dns.spoof on</code> with custom spoof records, or <code>http.proxy.injectjs</code> to insert client-side payloads. Observe victim behavior when browsing HTTP/HTTPS sites.</li>
+        <li>Stop and clean up: Type <code>arp.spoof off</code>, <code>http.proxy off</code>, <code>https.proxy off</code>, <code>net.sniff off</code>, then quit with <code>quit</code>. Disable IP forwarding if enabled. Document observations responsibly and recommend defenses: static ARP entries, dynamic ARP inspection, HTTPS enforcement (HSTS), certificate pinning, and endpoint monitoring.</li>
+      </ol>
+      <p>Expected results: Successful ARP poisoning, traffic redirection through your device, and visible interception of cleartext credentials or HTTP downgrades. Modern targets with HSTS/HTTPS-only may limit visibility unless downgrade techniques succeed. Common issues: Targets detect spoofing—reduce spoofing rate; no HTTPS downgrade—modern browsers enforce HSTS; wireless issues—requires monitor mode adapter for Wi-Fi modules.</p>
+      <img src="https://www.bettercap.org/assets/images/bettercap-http-proxy.png" alt="Bettercap HTTP Proxy Module Intercepting Traffic" class="img-fluid">
+      <p>For authoritative reference and resources, consult: <a href="https://www.bettercap.org/" target="_blank">Bettercap Official Website</a>, <a href="https://www.bettercap.org/installation/" target="_blank">Installation Guide</a>, <a href="https://www.bettercap.org/modules/" target="_blank">Module Documentation</a>, <a href="https://github.com/bettercap/bettercap" target="_blank">GitHub Repository</a>, and <a href="https://www.bettercap.org/legacy/" target="_blank">Legacy Documentation (v1 vs v2 differences)</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

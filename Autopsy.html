@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - Autopsy</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-autopsy">
+      <h2>Autopsy</h2>
+      <p>Autopsy is a free, open-source graphical digital forensics platform built on top of The Sleuth Kit (TSK) and maintained by Basis Technology with strong community contributions. It provides an intuitive interface for disk image analysis, file system parsing, deleted file recovery, timeline generation, keyword searching, hash set filtering, artifact extraction (registry, event logs, browser artifacts, email, LNK files, etc.), and automated ingest modules. Autopsy supports a wide range of image formats (dd, E01, AFF, raw, VMDK, etc.) and file systems (NTFS, FAT, exFAT, HFS+, EXT2/3/4, APFS, etc.), making it a go-to tool for incident responders, law enforcement, corporate forensics, and academic research in authorized investigations.</p>
+      <img src="https://www.autopsy.com/wp-content/uploads/2023/10/autopsy-4.21-main-window.png" alt="Autopsy Main Interface – Case Explorer and Data Sources View" class="img-fluid">
+      <h3>Uses</h3>
+      <p>Autopsy is employed in authorized digital forensic examinations to acquire and analyze disk images, recover deleted or hidden files, construct timelines of user activity, identify malware artifacts, extract user credentials and browser history, and generate court-admissible reports. Example: Processing a forensic image from a compromised endpoint in a controlled incident response scenario to recover deleted documents, reconstruct user actions, and identify indicators of compromise (IOCs) such as prefetch files, ShimCache entries, or Amcache data.</p>
+      <h3>Installation in Termux</h3>
+      <p>Autopsy is a Java-based desktop application requiring a graphical environment. Native execution in Termux is not practical due to GUI dependencies; use proot-distro (Ubuntu) with X11/VNC forwarding or run on a desktop Linux/Windows/macOS system. Steps for emulation:</p>
+      <pre><code>pkg update && pkg upgrade -y
+pkg install proot-distro -y
+proot-distro install ubuntu
+proot-distro login ubuntu
+# Inside Ubuntu chroot:
+apt update && apt upgrade -y
+apt install openjdk-17-jre wget -y
+# Download latest release (check https://www.autopsy.com/download/ for current version)
+wget https://github.com/sleuthkit/autopsy/releases/download/autopsy-4.21.0/autopsy-4.21.0.zip
+unzip autopsy-4.21.0.zip -d autopsy
+cd autopsy/autopsy-4.21.0
+# Run GUI (requires X11/VNC): java -jar bin/autopsy.jar
+# For command-line ingest (limited): java -jar bin/autopsy.jar --nogui --caseDir=/path/to/case --addDataSource=/path/to/image.dd</code></pre>
+      <p>Common issues: GUI not rendering—ensure VNC/X11 forwarding is configured; Java version mismatch—use OpenJDK 17; large case processing—mobile memory/storage constraints. To uninstall: Remove the proot-distro or extracted directory. Optimal performance is achieved on a dedicated forensic workstation with sufficient RAM (16GB+) and fast storage.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Create case: New Case → Specify case name and directory. Add data source: Add Data Source → Select image file or logical files → Configure ingest modules (file type identification, hash lookup, keyword search, etc.) → Finish. View data: Case Explorer (file system tree), Timeline (event chronology), Keyword Hits, Tags, Reports. Export: Generate HTML/Excel reports or export files with metadata. Always work on verified forensic images with write-blocking and chain-of-custody documentation.</p>
+      <img src="https://www.autopsy.com/wp-content/uploads/2023/10/autopsy-timeline-view.png" alt="Autopsy Timeline View with Event Correlation" class="img-fluid">
+
+      <h3>Detailed Tutorial: Forensic Image Analysis and Artifact Extraction (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates using Autopsy to process a forensic disk image, extract artifacts, and generate a timeline in a controlled lab environment (e.g., a test disk image from a compromised VM or acquired evidence you own). This procedure is permitted only in authorized forensic examinations or incident response activities with explicit written permission. Unauthorized analysis of digital media may violate privacy laws or evidence admissibility rules.</p>
+      <ol>
+        <li>Prepare test image: Create or obtain a forensic image (dd or E01 format) of a lab system (e.g., Windows VM with known activity: file creation/deletion, browser usage, malware execution). Verify hash (MD5/SHA) before analysis.</li>
+        <li>Launch Autopsy: Run <code>java -jar bin/autopsy.jar</code> in the Ubuntu chroot (or desktop). Create new case: Case Name → Base Directory → Case Number (optional) → Finish.</li>
+        <li>Add data source: Add Data Source → Disk Image or VM File → Browse to your .dd/.E01 file → Select time zone → Configure ingest modules (enable all for lab) → Next → Finish. Autopsy begins processing (file carving, hash lookup, timeline generation, etc.).</li>
+        <li>Review file system: In Case Explorer, browse the file system tree. Check Deleted Files, Unallocated Space, and $Recycle.Bin for recoverable items. Right-click files → Extract File or View in Hex.</li>
+        <li>Examine artifacts: Navigate to Views → File Types (group by extension), Web Artifacts (browser history/cookies), or Registry (user profiles, USB devices, ShimCache). Double-click entries for detailed parsing.</li>
+        <li>Build and analyze timeline: Views → Timeline → Configure range and filters (e.g., show file activity, registry changes, browser visits) → Apply. Zoom in on suspicious time periods to correlate events (e.g., malware execution → prefetch creation → network connections).</li>
+        <li>Search and tag: Use Keyword Search for specific strings (e.g., malware names, C2 domains). Tag relevant files (Right-click → Tag File → Add Tag) for reporting. Apply hash sets (Tools → Options → Hash Databases) to identify known-good or known-bad files.</li>
+        <li>Generate report: Report → Generate Report → Select modules (HTML, Excel) → Choose data (tagged items, timeline, keyword hits) → Generate. Review the report for chain-of-custody integrity, findings summary, and supporting evidence.</li>
+      </ol>
+      <p>Expected results: Structured extraction of files, registry artifacts, browser history, and timeline events with hash verification and detailed metadata, enabling reconstruction of system activity and identification of malicious behavior. Common issues: Slow ingest on large images—disable unnecessary modules or use a faster machine; missing artifacts—ensure appropriate ingest modules are selected; corrupted images—verify source hash before loading.</p>
+      <img src="https://www.autopsy.com/wp-content/uploads/2023/10/autopsy-keyword-hits.png" alt="Autopsy Keyword Hits and Search Results View" class="img-fluid">
+      <p>For authoritative reference and resources, consult: <a href="https://www.autopsy.com/" target="_blank">Autopsy Official Website</a>, <a href="https://www.autopsy.com/download/" target="_blank">Download Page</a>, <a href="https://sleuthkit.org/autopsy/docs/" target="_blank">Autopsy Documentation</a>, <a href="https://github.com/sleuthkit/autopsy" target="_blank">Autopsy GitHub Repository</a>, and <a href="https://www.sleuthkit.org/" target="_blank">The Sleuth Kit (core library)</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

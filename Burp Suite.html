@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - Burp Suite Community Edition</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-burpsuite">
+      <h2>Burp Suite Community Edition</h2>
+      <p>Burp Suite is the leading integrated platform for security testing of web applications. Developed by PortSwigger, it provides essential tools for manual and automated testing, including an intercepting proxy, request repeater, intruder for automated attacks, decoder, comparer, sequencer, and (in Professional Edition) an active scanner. The Community Edition is free and fully functional for manual testing, making it a cornerstone tool for ethical hackers, penetration testers, and security researchers learning web application vulnerabilities.</p>
+      <img src="https://portswigger.net/cms/images/8c/8c9e0f0e-5b5e-4e0e-9b0e-0f0e0f0e0f0e_Burp-Suite-Professional-2023.png" alt="Burp Suite Professional Interface Overview (Community Edition is similar)" class="img-fluid">
+      <h3>Uses</h3>
+      <p>Burp Suite is used to intercept, inspect, modify, and replay HTTP/S traffic; test for common web vulnerabilities (XSS, SQL injection, CSRF, IDOR, SSRF, etc.); perform fuzzing and brute-force attacks; analyze session tokens; and map application attack surfaces during authorized penetration testing. Example: Intercepting login requests to test for weak authentication, parameter tampering, or insecure direct object references in controlled lab environments.</p>
+      <h3>Installation in Termux</h3>
+      <p>Burp Suite is a Java-based desktop GUI application and requires Java Runtime Environment (JRE 11+). Native execution in Termux is challenging due to GUI requirements; use a desktop OS or emulate via proot-distro with X11/VNC:</p>
+      <pre><code># Recommended: Download Community Edition from official site on desktop
+# Visit https://portswigger.net/burp/communitydownload
+# Install Java 11+ if not present, then run the installer (.sh, .exe, etc.)
+# For Termux/Android (limited GUI via VNC/X11):
+pkg install proot-distro -y
+proot-distro install ubuntu
+proot-distro login ubuntu
+# Inside Ubuntu chroot:
+apt update && apt upgrade -y
+apt install default-jre wget -y
+# Download latest Community JAR (adjust version):
+wget https://portswigger.net/burp/releases/download?product=community&version=2025.7&type=jar -O burpsuite_community.jar
+# Run: java -jar burpsuite_community.jar
+# For GUI: Configure VNC/X11 forwarding (requires external VNC viewer app connected to localhost:5901)</code></pre>
+      <p>Common issues: GUI rendering failure—ensure VNC/X11 is properly set up; certificate errors—install Burp's CA certificate in browser/system trust store. To uninstall: Remove the JAR or proot-distro. Optimal performance and usability are achieved on a desktop/laptop environment.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Core tabs: Proxy (intercept and history), Target (site map), Intruder (automated attacks), Repeater (manual request modification), Decoder (encoding/decoding), Comparer (diff analysis). Configure proxy: Set browser/system proxy to 127.0.0.1:8080. Install CA certificate: Proxy → Intercept → HTTP history → right-click → "Save item" → export certificate. Launch attacks: Send request to Repeater/Intruder from Proxy history. Always test on authorized targets only.</p>
+      <img src="https://portswigger.net/cms/images/1d/1d9e0f0e-5b5e-4e0e-9b0e-0f0e0f0e0f0e_Burp-Proxy-Intercept.png" alt="Burp Suite Proxy Intercept View" class="img-fluid">
+
+      <h3>Detailed Tutorial: Intercepting and Testing Web Requests (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates basic use of Burp Suite Community Edition to intercept, analyze, and modify HTTP requests against a deliberately vulnerable test application (e.g., DVWA, Juice Shop, or PortSwigger Web Security Academy labs you control or are authorized to use). Perform all testing exclusively on systems you own or for which you have explicit written permission. Unauthorized interception or modification of traffic is illegal.</p>
+      <ol>
+        <li>Launch Burp Suite and configure proxy: Start the application → Temporary project → Start Burp. Go to Proxy → Options → ensure Proxy listener is running on 127.0.0.1:8080. Install Burp CA certificate in your browser (Proxy → Intercept → CA Certificate → Export in DER format, then import into browser trust store).</li>
+        <li>Set up browser proxy: Configure your browser (Firefox/Chrome) to use manual proxy: HTTP/HTTPS 127.0.0.1 port 8080. Verify with http://burp (should show certificate download page).</li>
+        <li>Intercept traffic: In Burp, Proxy → Intercept → Turn Intercept on (button should be green). Browse to your test application (e.g., http://localhost/dvwa/login.php). Requests appear in Intercept tab.</li>
+        <li>Analyze and modify: Forward legitimate requests until a target request (e.g., login POST). Intercept it, modify parameters (e.g., change username/password, add unexpected fields, tamper with cookies). Click Forward to send modified request.</li>
+        <li>Test for vulnerabilities: Use Repeater: Right-click intercepted request in Proxy history → Send to Repeater. In Repeater tab, modify and send repeatedly (e.g., test SQL injection payloads in username field: ' OR 1=1 --). Observe responses for errors, redirects, or unauthorized access.</li>
+        <li>Automate basic fuzzing with Intruder: Send request to Intruder → Positions tab → Clear § → Highlight payload position (e.g., password field) → Add §. Payloads tab → Simple list → Load wordlist (e.g., rockyou.txt or small custom list). Start attack → Analyze results for different response lengths/codes indicating success (e.g., login bypass).</li>
+        <li>Map application: Browse the entire app with Intercept off; Burp builds Site map in Target tab. Review for hidden endpoints, parameters, and attack surface.</li>
+        <li>Document and report: Export requests/responses (right-click → Save item). Note findings (e.g., reflected XSS, weak session handling) and recommend fixes (input validation, secure headers, rate limiting).</li>
+      </ol>
+      <p>Expected results: Clear visibility into application behavior, successful demonstration of vulnerabilities (e.g., parameter tampering leading to unauthorized access), and detailed request/response analysis. Common issues: HTTPS interception failures—ensure CA certificate is trusted; rate limiting—slow Intruder attacks; Java memory—run with -Xmx4g flag if needed.</p>
+      <img src="https://portswigger.net/cms/images/7f/7f9e0f0e-5b5e-4e0e-9b0e-0f0e0f0e0f0e_Burp-Intruder-Attack.png" alt="Burp Suite Intruder Attack Configuration Example" class="img-fluid">
+      <p>For authoritative reference and learning resources, consult: <a href="https://portswigger.net/burp/communitydownload" target="_blank">Burp Suite Community Edition Download</a>, <a href="https://portswigger.net/burp/documentation" target="_blank">Official Documentation</a>, <a href="https://portswigger.net/web-security" target="_blank">Web Security Academy (free labs)</a>, and <a href="https://github.com/PortSwigger" target="_blank">PortSwigger GitHub</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

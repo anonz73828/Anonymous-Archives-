@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - Kismet</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-kismet">
+      <h2>Kismet</h2>
+      <p>Kismet is a leading open-source wireless network detector, packet sniffer, wardriving tool, and wireless intrusion detection system (WIDS) developed by Mike Kershaw and the Kismet community. It passively captures 802.11 (Wi-Fi) traffic in monitor mode, identifies hidden and cloaked networks, detects rogue access points, performs spectrum analysis (with supported SDR hardware), logs packets in pcap/pcapng format, and provides real-time visualization via a rich web UI. Kismet supports multiple data sources (including remote capture), plugin extensibility, and alerting on suspicious activity. It is widely used in ethical wireless security assessments, penetration testing, regulatory compliance auditing, and research into wireless protocols and vulnerabilities.</p>
+      <img src="https://www.kismetwireless.net/screenshot/kismet-newui-2024-1.png" alt="Kismet Web UI – Device List and Channel Overview" class="img-fluid">
+      <h3>Uses</h3>
+      <p>Kismet is employed in authorized wireless security testing to passively discover access points and clients, map wireless coverage, detect misconfigurations (open networks, WEP usage, evil twin APs), identify hidden SSIDs, capture raw 802.11 frames for forensic analysis, and monitor for unauthorized or rogue devices. Example: Running Kismet in a lab environment to inventory all Wi-Fi networks, detect clients connecting to insecure APs, and capture management frames during controlled wardriving or site survey exercises.</p>
+      <h3>Installation in Termux</h3>
+      <p>Kismet is not available as a pre-built package in standard Termux repositories and requires compilation from source. Full functionality (monitor mode, packet injection, spectrum analysis) requires root privileges, a compatible wireless adapter supporting monitor mode, and often Kali NetHunter or external hardware. Basic installation steps:</p>
+      <pre><code>pkg update && pkg upgrade -y
+pkg install git build-essential cmake make libpcap-dev libnl-3-dev libnl-genl-3-dev libdw-dev libmicrohttpd-dev libsqlite3-dev libpcre3-dev zlib-dev libusb-1.0-0-dev libgps-dev libprotobuf-dev protobuf-compiler libcapstone-dev libnm-dev libwebsockets-dev -y
+git clone https://www.kismetwireless.net/git/kismet
+cd kismet
+./configure --prefix=/data/data/com.termux/files/usr
+make
+make suidinstall   # Installs setuid root binary for monitor mode
+# Test: kismet -h
+# Run: sudo kismet -c wlan0mon   # or use kismet -c source definition</code></pre>
+      <p>Common issues: Monitor mode not available—requires compatible adapter (e.g., Atheros AR9271, Ralink RT3070) and drivers; permission errors—ensure setuid install completed; missing dependencies—install additional -dev packages as prompted. To uninstall: Remove the cloned directory and run make uninstall if supported. Optimal deployment (especially live capture and spectrum analysis) occurs on dedicated Linux systems or Kali NetHunter with supported hardware.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Basic passive scan: <code>kismet -c wlan0</code> (auto-creates monitor interface). Web UI: Access http://localhost:2501 after launch. Capture to pcap: <code>kismet -c wlan0 -T pcap -t capture</code>. Define sources: Edit kismet.conf or use <code>kismet -c addme:type=linuxwifi,interface=wlan0,name=Main</code>. Enable alerts: Configure in kismet_alerts.conf (e.g., rogue AP detection). Always operate on networks you own or have explicit written permission to monitor.</p>
+      <img src="https://www.kismetwireless.net/screenshot/kismet-newui-2024-2.png" alt="Kismet Web UI – Packet and Device Details" class="img-fluid">
+
+      <h3>Detailed Tutorial: Passive Wireless Network Discovery and Packet Capture (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates using Kismet to passively discover Wi-Fi networks, clients, and capture raw 802.11 frames in a controlled lab environment (e.g., a local wireless network with test access points and clients you own). This procedure is permitted only on networks and systems you control or for which you have explicit written authorization. Unauthorized wireless monitoring or packet capture is illegal in many jurisdictions.</p>
+      <ol>
+        <li>Prepare hardware and environment: Ensure a compatible wireless adapter is connected (e.g., via USB OTG) and supports monitor mode. Identify interface name (e.g., wlan1) with <code>iwconfig</code> or <code>ip link</code>. Confirm lab isolation and permission.</li>
+        <li>Start Kismet server: Run <code>sudo kismet -c wlan1</code> (or <code>sudo kismet -c addme:type=linuxwifi,interface=wlan1,name=Lab</code> for explicit source). Kismet initializes monitor mode and begins passive scanning.</li>
+        <li>Access web UI: Open a browser on the same device or another on the network at http://localhost:2501 (or http://<termux-ip>:2501). Log in with default credentials if prompted (configure in kismet.conf for production).</li>
+        <li>Observe discovered devices: In the Devices tab, view real-time list of access points (APs) and clients. Kismet identifies SSIDs (including hidden ones via probe requests), BSSIDs, channels, encryption types (Open, WEP, WPA, WPA2, WPA3), manufacturer (via OUI), and signal strength. Clients are correlated with APs via association/probe traffic.</li>
+        <li>Enable packet logging: Stop Kismet (Ctrl+C) and restart with logging: <code>sudo kismet -c wlan1 -T pcap -t lab-capture --pcapng</code>. This saves all captured frames to lab-capture-*.pcapng files.</li>
+        <li>Trigger test traffic: From test devices, connect to an open or WPA2 lab AP, browse websites, or send probe requests. Kismet passively records beacons, probes, data frames, and management frames.</li>
+        <li>Analyze captured data: In the web UI (or later with Wireshark), review the Devices and Packets tabs for detailed breakdowns. Export packets (File → Export Packets) or view alerts (Alerts tab) for suspicious activity (e.g., hidden SSID usage, deauth floods if enabled).</li>
+        <li>Document and recommend: Record discovered networks, encryption status, rogue APs (if any), and client behavior. Suggest defenses: disable SSID broadcasting only when necessary, enforce WPA3, implement rogue AP detection, use 802.1X/EAP for enterprise networks, and deploy WIPS (wireless intrusion prevention).</li>
+      </ol>
+      <p>Expected results: Comprehensive passive discovery of all nearby Wi-Fi networks and clients, real-time signal strength and channel usage, and full 802.11 frame capture for later analysis. Common issues: No monitor mode—verify adapter compatibility and driver support; limited range—use external high-gain antenna; high CPU usage—reduce channel hopping or use single-channel capture.</p>
+      <img src="https://www.kismetwireless.net/screenshot/kismet-newui-2024-3.png" alt="Kismet Web UI – Packet Details and Protocol Dissection" class="img-fluid">
+      <p>For authoritative reference and resources, consult: <a href="https://www.kismetwireless.net/" target="_blank">Kismet Official Website</a>, <a href="https://www.kismetwireless.net/docs/" target="_blank">Kismet Documentation</a>, <a href="https://www.kismetwireless.net/download/" target="_blank">Download and Installation Guide</a>, <a href="https://github.com/kismetwireless/kismet" target="_blank">Kismet GitHub Repository</a>, and <a href="https://www.kismetwireless.net/code/" target="_blank">Source Code and Plugins</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

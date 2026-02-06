@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - Reaver</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-reaver">
+      <h2>Reaver</h2>
+      <p>Reaver is an open-source implementation of a brute-force attack against the Wi-Fi Protected Setup (WPS) PIN vulnerability, originally developed by Tactical Network Solutions and later enhanced by the community. It exploits a design flaw in many early WPS implementations that allowed offline guessing of the 8-digit WPS PIN through repeated M4–M7 message exchanges, ultimately recovering the WPA/WPA2 pre-shared key (PSK). While highly effective against vulnerable legacy access points (circa 2006–2012), Reaver is now largely ineffective against modern devices due to vendor mitigations (rate limiting, temporary/permanent lockouts, randomized nonces, and default WPS disabling). This page exists solely for historical education and defensive awareness: to explain the WPS weakness, illustrate why legacy hardware remains at risk, and reinforce best-practice configuration of wireless networks.</p>
+      <p><strong>Critical Legal and Ethical Notice:</strong> Reaver must only be used on wireless networks and devices you own or for which you have explicit, written authorization to test. Unauthorized WPS PIN brute-forcing or key recovery constitutes illegal access to a network and may result in criminal liability. This page provides no download links, active exploitation instructions, or facilitation of use. The content is intended purely for understanding historical vulnerabilities and implementing effective defenses.</p>
+      <img src="https://www.kali.org/tools/reaver/images/reaver-logo.png" alt="Reaver Logo" class="img-fluid">
+      <h3>Historical Capabilities (Defensive Awareness)</h3>
+      <p>Reaver's primary workflow included:</p>
+      <ul>
+        <li>Passive discovery of WPS-enabled access points (via wash or airodump-ng)</li>
+        <li>Brute-force enumeration of the 8-digit WPS PIN (11,000 possible combinations due to checksum)</li>
+        <li>Recovery of the WPA/WPA2 PSK once the correct PIN is found</li>
+        <li>Support for Pixie Dust attack (offline key recovery when vulnerable nonces are present)</li>
+        <li>Rate limiting evasion via MAC spoofing, channel hopping, and delay adjustments</li>
+      </ul>
+      <p>Success depended entirely on the presence of WPS and the lack of lockout mechanisms on the target AP.</p>
+      <h3>Detection and Mitigation (Defensive Focus)</h3>
+      <p>Modern access points and security practices effectively neutralize Reaver-style attacks:</p>
+      <ul>
+        <li>Disable WPS completely in router firmware (most effective and recommended solution)</li>
+        <li>Enable WPS lockout after 3–10 failed attempts (temporary or permanent)</li>
+        <li>Use randomized or strong nonces to prevent Pixie Dust</li>
+        <li>Implement MAC filtering, hidden SSID (limited benefit), and strong WPA3-PSK/WPA3-Enterprise</li>
+        <li>Monitor for repeated M1–M7 exchanges via wireless IDS (Kismet, commercial WIPS)</li>
+        <li>Replace legacy routers (pre-2015 models) that lack modern WPS mitigations</li>
+      </ul>
+      <p>Any remaining WPS-enabled access point should be considered critically vulnerable and disabled immediately. Organizations should conduct wireless audits to identify and remediate legacy WPS configurations.</p>
+      <img src="https://www.kali.org/tools/reaver/images/reaver-wash.png" alt="wash Output Identifying WPS-Enabled APs (historical)" class="img-fluid">
+
+      <h3>Educational Analysis Resources</h3>
+      <p>Reputable public sources for historical context and defensive guidance:</p>
+      <ul>
+        <li><a href="https://github.com/t6x/reaver-wps-fork-t6x" target="_blank">Reaver-wps-fork-t6x (last actively maintained fork)</a></li>
+        <li><a href="https://www.kali.org/tools/reaver/" target="_blank">Kali Linux Reaver Documentation</a></li>
+        <li><a href="https://wifipineapple.com/modules/module/21" target="_blank">WiFi Pineapple WPS PIN Recovery Module (historical context)</a></li>
+        <li><a href="https://nvd.nist.gov/vuln/detail/CVE-2011-2710" target="_blank">NIST NVD – WPS Design Flaw Reference (CVE-2011-2710)</a></li>
+        <li><a href="https://www.kb.cert.org/vuls/id/723755" target="_blank">CERT Vulnerability Note VU#723755 – WPS PIN Brute Force Vulnerability</a></li>
+      </ul>
+
+      <h3>Conclusion</h3>
+      <p>Reaver remains one of the most impactful tools in the history of wireless security, exposing a fundamental design flaw in the WPS specification that led to widespread compromise of WPA/WPA2 networks during the early 2010s. Its success drove rapid vendor adoption of lockout mechanisms, Pixie Dust mitigations, and the eventual recommendation to disable WPS entirely. Today, Reaver serves primarily as an educational artifact demonstrating the dangers of insecure provisioning protocols and reinforcing the importance of disabling unnecessary features, enforcing WPA3, and conducting regular wireless configuration audits. Any organization still operating WPS-enabled access points should treat them as high-risk and remediate immediately.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

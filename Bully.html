@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - Bully</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-bully">
+      <h2>Bully</h2>
+      <p>Bully is an open-source implementation of a WPS (Wi-Fi Protected Setup) PIN brute-force attack tool, developed by Kyle "kyle" and later maintained by the community as a more efficient and reliable alternative to Reaver in certain scenarios. It exploits the same fundamental design weakness in many WPS implementations that allows offline guessing of the 8-digit PIN through repeated M4–M7 message exchanges, ultimately recovering the WPA/WPA2 pre-shared key (PSK). Bully includes optimizations such as better rate limiting evasion, support for Pixie Dust attack, and improved handling of fragmented or delayed responses. Like Reaver, Bully is now largely ineffective against modern access points due to widespread vendor mitigations (lockouts, randomized nonces, rate limiting, and default WPS disabling). This page is provided strictly for historical, educational, and defensive purposes: to document the WPS vulnerability, explain its obsolescence on current hardware, and emphasize proper wireless security configuration.</p>
+      <p><strong>Critical Legal and Ethical Notice:</strong> Bully must only be used on wireless networks and devices you own or for which you have explicit, written authorization to test. Unauthorized WPS PIN brute-forcing or key recovery constitutes illegal access to a network and may result in criminal liability. This page provides no download links, installation instructions, or operational guidance for active use. The content is intended solely for understanding historical vulnerabilities and implementing effective defenses.</p>
+      <img src="https://github.com/kimocoder/bully/raw/master/doc/bully_screenshot.png" alt="Bully Command-Line Output During WPS PIN Brute-Force (historical)" class="img-fluid">
+      <h3>Historical Capabilities (Defensive Awareness)</h3>
+      <p>Bully's primary workflow included:</p>
+      <ul>
+        <li>Enumeration of WPS-enabled access points (via wash or manual BSSID specification)</li>
+        <li>Brute-force attack against the 8-digit WPS PIN (11,000 effective combinations due to checksum)</li>
+        <li>Recovery of the WPA/WPA2 PSK once the correct PIN is discovered</li>
+        <li>Support for Pixie Dust attack (offline key recovery using predictable nonces in vulnerable implementations)</li>
+        <li>Advanced options for rate limiting evasion (delays, MAC randomization, channel hopping)</li>
+        <li>Verbose logging of M1–M7 exchanges for debugging and analysis</li>
+      </ul>
+      <p>Success was highly dependent on the presence of WPS, the absence of lockout mechanisms, and the specific implementation flaws on the target AP.</p>
+      <h3>Detection and Mitigation (Defensive Focus)</h3>
+      <p>Modern wireless networks are effectively immune to Bully-style attacks through the following controls:</p>
+      <ul>
+        <li>Complete disabling of WPS in router firmware (strongly recommended and default on most enterprise-grade APs since ~2015)</li>
+        <li>Implementation of WPS lockout after a small number of failed attempts (temporary or permanent)</li>
+        <li>Randomized or cryptographically strong nonces to prevent Pixie Dust</li>
+        <li>Transition to WPA3-Personal (SAE) or WPA3-Enterprise with strong authentication</li>
+        <li>Wireless intrusion detection/prevention systems (WIPS) monitoring for repeated WPS probe requests or M4–M7 exchanges</li>
+        <li>MAC filtering, management frame protection (802.11w), and regular firmware updates</li>
+      </ul>
+      <p>Any access point still vulnerable to Bully/Reaver-style attacks should be considered critically insecure and immediately reconfigured or replaced.</p>
+      <img src="https://github.com/kimocoder/bully/raw/master/doc/bully_pixie.png" alt="Bully Pixie Dust Attack Output Example (historical)" class="img-fluid">
+
+      <h3>Educational Analysis Resources</h3>
+      <p>Reputable public sources for historical context and defensive guidance:</p>
+      <ul>
+        <li><a href="https://github.com/kimocoder/bully" target="_blank">Bully GitHub Repository (maintained fork with documentation)</a></li>
+        <li><a href="https://github.com/t6x/reaver-wps-fork-t6x" target="_blank">Reaver-wps-fork-t6x (related project with overlapping WPS attack code)</a></li>
+        <li><a href="https://www.kali.org/tools/reaver/" target="_blank">Kali Linux Reaver/Bully Documentation (legacy tool listing)</a></li>
+        <li><a href="https://nvd.nist.gov/vuln/detail/CVE-2011-2710" target="_blank">NIST NVD – WPS Design Flaw Reference (CVE-2011-2710)</a></li>
+        <li><a href="https://www.kb.cert.org/vuls/id/723755" target="_blank">CERT Vulnerability Note VU#723755 – WPS PIN Brute Force Vulnerability</a></li>
+      </ul>
+
+      <h3>Conclusion</h3>
+      <p>Bully represents an important evolutionary step in wireless security tooling during the early-to-mid 2010s, offering improved performance and reliability over the original Reaver implementation for exploiting WPS PIN vulnerabilities. Its widespread use helped accelerate vendor adoption of WPS lockout mechanisms, Pixie Dust mitigations, and the eventual industry recommendation to disable WPS entirely. Today, Bully serves primarily as a historical and educational reference demonstrating the severe risks associated with insecure provisioning protocols and reinforcing the necessity of modern wireless security practices: disabling WPS, enforcing WPA3, enabling management frame protection, and conducting regular wireless configuration audits. Any organization still operating WPS-enabled access points should treat them as high-risk and remediate without delay.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

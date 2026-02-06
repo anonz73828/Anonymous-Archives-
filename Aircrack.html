@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - Aircrack-ng</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-aircrackng">
+      <h2>Aircrack-ng</h2>
+      <p>Aircrack-ng is a comprehensive open-source suite of tools designed for auditing wireless network security. It enables monitoring of Wi-Fi traffic, packet capture, injection attacks, testing of wireless card capabilities, and cracking of WEP and WPA/WPA2-PSK keys. The suite includes utilities such as airmon-ng, airodump-ng, aireplay-ng, and aircrack-ng itself.</p>
+      <img src="https://www.aircrack-ng.org/images/aircrack-ng-cracking-wep.png" alt="Aircrack-ng Cracking a WEP Key Screenshot" class="img-fluid">
+      <h3>Uses</h3>
+      <p>Aircrack-ng is employed for assessing Wi-Fi vulnerabilities, capturing handshakes, generating traffic via injection, and recovering pre-shared keys in authorized penetration testing scenarios. Example: Capturing a WPA handshake from your own access point and testing passphrase strength against dictionary attacks to evaluate network resilience.</p>
+      <h3>Installation in Termux</h3>
+      <p>Aircrack-ng requires monitor mode and packet injection support, which typically needs an external compatible USB Wi-Fi adapter (e.g., Alfa AWUS036 series) connected via OTG. Installation in Termux often uses community repositories or scripts:</p>
+      <pre><code>pkg update && pkg upgrade -y
+pkg install root-repo -y  # Or tur-repo if available
+pkg install aircrack-ng iw -y
+# Alternative manual method via script (verify source):
+git clone https://github.com/Amanoff-official/aircrack.git
+cd aircrack
+chmod +x install.sh
+./install.sh</code></pre>
+      <p>After installation, enable monitor mode with <code>airmon-ng start wlan0</code> (replace wlan0 with your interface). Common issues: No monitor mode—adapter incompatibility or missing drivers; permission errors—use <code>tsu</code> or root if available. To uninstall: Remove packages and directories. Full functionality often requires Kali NetHunter or rooted device with compatible hardware.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Start monitor mode: <code>airmon-ng start wlan0</code>. Scan networks: <code>airodump-ng wlan0mon</code>. Capture handshake: Use aireplay-ng for deauth. Crack key: <code>aircrack-ng -w wordlist.txt capture.cap</code>. Always operate on networks you own or have explicit written permission to test.</p>
+      <img src="https://www.aircrack-ng.org/images/airodump-ng.png" alt="Airodump-ng Scanning Networks" class="img-fluid">
+
+      <h3>Detailed Tutorial: Capturing WPA/WPA2 Handshake and Cracking (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates capturing a WPA/WPA2 handshake and attempting to recover the pre-shared key using a wordlist attack in a controlled lab (e.g., your own access point with a known weak passphrase). This must be performed exclusively on networks you own or have explicit written authorization to test. Unauthorized access or cracking is illegal.</p>
+      <ol>
+        <li>Prepare hardware and interface: Connect a compatible Wi-Fi adapter supporting monitor mode. In Termux, identify interface with <code>iwconfig</code> or <code>ifconfig</code>.</li>
+        <li>Enable monitor mode: <code>airmon-ng check kill</code> (stops interfering processes), then <code>airmon-ng start wlan0</code> (creates wlan0mon).</li>
+        <li>Scan for target network: <code>airodump-ng wlan0mon</code>. Note the BSSID, channel, and ESSID of your test AP. Press Ctrl+C to stop.</li>
+        <li>Capture targeted traffic: <code>airodump-ng -c [channel] --bssid [BSSID] -w capture wlan0mon</code>. This writes packets to capture-01.cap (and increments if needed).</li>
+        <li>Force handshake via deauthentication: In a new Termux session, run <code>aireplay-ng --deauth 10 -a [BSSID] -c [client MAC] wlan0mon</code> (replace client MAC from airodump-ng; repeat if no handshake). Reconnect a client device to the AP to trigger handshake.</li>
+        <li>Verify handshake: In airodump-ng window, look for "WPA handshake" in top right. Stop capture with Ctrl+C.</li>
+        <li>Crack the key: Use a wordlist (e.g., rockyou.txt): <code>aircrack-ng -w /path/to/wordlist.txt capture-01.cap</code>. If the passphrase is in the list, it displays "KEY FOUND!".</li>
+        <li>Clean up: <code>airmon-ng stop wlan0mon</code> and restart network managers if needed. Document results for security improvements.</li>
+      </ol>
+      <p>Expected results: Successful handshake capture followed by key recovery if the passphrase matches the wordlist. Common issues: No handshake—ensure active client reconnection; slow cracking—use larger wordlists or GPU acceleration (not native in Termux). For WEP (legacy), fewer packets suffice due to PTW method.</p>
+      <img src="https://www.aircrack-ng.org/images/aireplay-ng-injection-test.png" alt="Aireplay-ng Injection Test Example" class="img-fluid">
+      <p>For official documentation and updates, refer to: <a href="https://www.aircrack-ng.org/" target="_blank">Aircrack-ng Project Website</a> and <a href="https://www.aircrack-ng.org/doku.php?id=cracking_wpa" target="_blank">WPA Cracking Tutorial</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

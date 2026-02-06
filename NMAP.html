@@ -1,0 +1,17 @@
+<!-- ... header and navbar as before ... -->
+    <section id="tool-nmap">
+      <!-- Original content: description, uses, installation, functions -->
+      <!-- Add or expand the tutorial section -->
+      <h3>Detailed Tutorial: Advanced Network Enumeration with Nmap</h3>
+      <p>This tutorial guides through a comprehensive, ethical scan on an authorized target (e.g., local lab VM). Permission is mandatory.</p>
+      <ol>
+        <li>Basic host discovery: <code>nmap -sn 192.168.1.0/24</code> – Lists live hosts without port scanning.</li>
+        <li>Port and service scan: <code>nmap -sV -sC -O 192.168.1.100</code> – Detects versions, runs default scripts, fingerprints OS.</li>
+        <li>Aggressive scan with output: <code>nmap -A -T4 -oN scan_results.txt 192.168.1.100</code> – Includes traceroute, scripts; saves to file.</li>
+        <li>Analyze results: Review open ports (e.g., 22/ssh, 80/http), services, and potential vulnerabilities from script output.</li>
+        <li>Script-specific scan: <code>nmap --script vuln 192.168.1.100</code> – Checks for known vulnerabilities.</li>
+      </ol>
+      <img src="https://nmap.org/book/images/nmap-windows-demo-710x473.png" alt="Nmap Scan Output Example on Windows" class="img-fluid">
+      <p>Interpret results carefully and report responsibly. Reference: <a href="https://nmap.org/book/man.html" target="_blank">Nmap Documentation</a>.</p>
+    </section>
+<!-- ... footer scripts ... -->

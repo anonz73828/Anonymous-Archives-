@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - NetworkMiner</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-networkminer">
+      <h2>NetworkMiner</h2>
+      <p>NetworkMiner is an open-source network forensic analysis tool (NFAT) developed by NETRESEC. It passively analyzes pcap or pcapng files (or live network interfaces) to extract and reassemble application-layer artifacts such as transmitted files, credentials, certificates, images, emails, and keystrokes without sending any packets or altering traffic. NetworkMiner presents extracted data in a structured, tabbed interface organized by host, session, file, credential, and parameter views, making it exceptionally useful for incident response, malware analysis, post-exploitation forensics, and validating data exfiltration or credential theft during authorized security assessments.</p>
+      <img src="https://www.netresec.com/images/NetworkMiner_2.8.1_Host_Tab.png" alt="NetworkMiner Host Tab Showing Reconstructed Artifacts" class="img-fluid">
+      <h3>Uses</h3>
+      <p>NetworkMiner is employed in ethical forensic investigations to extract files, credentials, and other artifacts from captured traffic, reconstruct file transfers (HTTP, SMB, SMTP, FTP, TFTP), identify malware download or C2 channels, recover session cookies, and map communication patterns without active probing. Example: Analyzing a pcap file from a compromised system in a controlled lab to recover exfiltrated documents, stolen credentials, or dropped malware payloads during an authorized incident response or red team debrief.</p>
+      <h3>Installation in Termux</h3>
+      <p>NetworkMiner is a .NET Windows application requiring the Mono runtime for Linux/Android execution. Full GUI operation in Termux requires proot-distro (Ubuntu) with X11/VNC forwarding. Steps:</p>
+      <pre><code>pkg update && pkg upgrade -y
+pkg install proot-distro -y
+proot-distro install ubuntu
+proot-distro login ubuntu
+# Inside Ubuntu chroot:
+apt update && apt upgrade -y
+apt install mono-complete wget unzip -y
+# Download latest release (check https://www.netresec.com/?page=NetworkMiner for current version)
+wget https://www.netresec.com/?download=NetworkMiner -O NetworkMiner.zip
+unzip NetworkMiner.zip -d NetworkMiner
+cd NetworkMiner
+# Run GUI (requires X11/VNC): mono NetworkMiner.exe
+# For CLI extraction (limited): mono NetworkMiner.exe -r capture.pcap</code></pre>
+      <p>Common issues: GUI not displaying—configure VNC/X11 forwarding; Mono version mismatch—ensure mono-complete is installed; large pcap files—mobile storage and memory constraints. To uninstall: Remove the proot-distro or extracted directory. Optimal analysis (especially large captures) is best performed on a desktop Linux/Windows system.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Launch GUI: <code>mono NetworkMiner.exe</code>. Open pcap: File → Open → Select capture file. View tabs: Hosts (IP/MAC/hostname), Files (carved/reassembled files), Credentials (username/password pairs), Sessions (TCP/UDP flows), Parameters (HTTP POST/GET data), DNS (queries/responses), Keywords (custom search hits). Export artifacts: Right-click files/credentials → Save As. Live capture: Capture → Start (requires libpcap/WinPcap). Always analyze traffic from authorized sources only.</p>
+      <img src="https://www.netresec.com/images/NetworkMiner_2.8.1_Files_Tab.png" alt="NetworkMiner Files Tab Showing Extracted Artifacts" class="img-fluid">
+
+      <h3>Detailed Tutorial: Passive Artifact Extraction from pcap File (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates using NetworkMiner to passively extract files, credentials, and other artifacts from a pre-captured pcap file in a controlled lab environment (e.g., traffic generated from test systems you own). This procedure is permitted only on captures from networks and systems you control or for which you have explicit written authorization. Unauthorized analysis of network traffic is illegal in many jurisdictions.</p>
+      <ol>
+        <li>Prepare test capture: Generate sample traffic in a lab (e.g., browse HTTP sites, upload/download files via FTP/SMB, send emails via SMTP, or simulate credential entry on an insecure web form). Capture the traffic using tcpdump, Wireshark, or Bettercap and save as capture.pcap.</li>
+        <li>Launch NetworkMiner: In the Ubuntu chroot (or desktop), run <code>mono NetworkMiner.exe</code>. Ensure X11/VNC is configured if using GUI in Termux emulation.</li>
+        <li>Open the pcap file: File → Open → Navigate to capture.pcap. NetworkMiner automatically parses the file and populates all tabs (may take several seconds to minutes depending on capture size).</li>
+        <li>Review Hosts tab: Examine the list of observed IP addresses, hostnames, MAC addresses, operating systems (via fingerprinting), and session counts. Double-click any host to see detailed communication patterns.</li>
+        <li>Examine Files tab: View reassembled and carved files (e.g., downloaded images, uploaded documents, malware binaries). Right-click entries → Save As to extract files to disk. Check MD5/SHA hashes for known-good/malicious comparison.</li>
+        <li>Inspect Credentials tab: Look for extracted username/password pairs from cleartext protocols (HTTP Basic, FTP, Telnet, SMTP AUTH, etc.) or form POST data. NetworkMiner highlights sensitive fields automatically.</li>
+        <li>Check other tabs: Parameters tab shows HTTP form data and cookies; Sessions tab lists TCP/UDP flows with duration and byte counts; Keywords tab allows custom string searches across the capture.</li>
+        <li>Export and document: Use File → Export Objects → All Files/Hosts/Credentials to save artifacts. Generate a report (limited in free version) or manually document findings (e.g., exfiltrated files, leaked credentials, suspicious C2 domains). Recommend defenses: enforce HTTPS everywhere (HSTS), disable insecure protocols, implement network segmentation, DLP, and continuous monitoring.</li>
+      </ol>
+      <p>Expected results: Structured reconstruction of transmitted files, credentials, certificates, and session details directly from passive pcap analysis, often revealing data leakage or malicious activity not easily visible in traditional packet viewers. Common issues: Incomplete reassembly—large/fragmented transfers may require manual Wireshark follow-up; encrypted traffic—NetworkMiner cannot extract inside TLS unless keys are available; large captures—memory constraints on mobile emulation.</p>
+      <img src="https://www.netresec.com/images/NetworkMiner_2.8.1_Credentials_Tab.png" alt="NetworkMiner Credentials Tab Showing Extracted Username/Password Pairs" class="img-fluid">
+      <p>For authoritative reference and resources, consult: <a href="https://www.netresec.com/?page=NetworkMiner" target="_blank">NetworkMiner Official Website</a>, <a href="https://www.netresec.com/?page=DownloadNetworkMiner" target="_blank">Download Page (Free and Professional Editions)</a>, <a href="https://www.netresec.com/?page=NetworkMinerDocs" target="_blank">Documentation and Tutorials</a>, and <a href="https://www.netresec.com/?page=PCAPfiles" target="_blank">Sample PCAP Files for Practice</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

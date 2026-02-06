@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - Wireshark</title>
+  <!-- Paste the full <style> block from index.html here -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <!-- ... -->
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-wireshark">
+      <h2>Wireshark</h2>
+      <p>Wireshark is the world's leading open-source network protocol analyzer. It captures live network traffic, displays packets in detailed human-readable form, and supports deep inspection of hundreds of protocols for troubleshooting, analysis, and security auditing.</p>
+      <img src="https://www.wireshark.org/docs/wsug_html_chunked/figures/ws-main.png" alt="Wireshark Main Interface" class="img-fluid">
+      <h3>Uses</h3>
+      <p>Wireshark is used for packet capture, protocol dissection, traffic analysis, identifying anomalies (e.g., unusual patterns indicating attacks), and verifying network behavior. Example: Capturing HTTP traffic to inspect unencrypted data or detecting port scans in ethical assessments.</p>
+      <h3>Installation in Termux</h3>
+      <p>Wireshark requires a graphical environment in Termux (no native CLI-only capture without root). Use X11/VNC setup:</p>
+      <pre><code>pkg update && pkg upgrade -y
+pkg install x11-repo -y
+pkg install wireshark wireshark-gtk xterm tigervnc -y
+vncserver :1 -geometry 1280x720  # Set password when prompted
+# Then use a VNC viewer app to connect to localhost:5901</code></pre>
+      <p>Launch Wireshark via VNC session: <code>wireshark &</code>. Common issues: GUI not displaying—ensure VNC is connected; permissions—run <code>termux-setup-storage</code>. For basic CLI capture (limited), use tcpdump instead (<code>pkg install tcpdump</code>).</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Select interface and start capture; apply display filters (e.g., http); follow streams (right-click packet > Follow > TCP Stream). Export objects or save captures (.pcapng). Ethical note: Capture only on networks you own or have authorization for.</p>
+      <img src="https://www.wireshark.org/docs/wsug_html_chunked/figures/ws-filter-toolbar.png" alt="Wireshark Filter Example" class="img-fluid">
+
+      <h3>Detailed Tutorial: Basic Packet Capture and Analysis (Ethical Lab Scenario)</h3>
+      <p>This tutorial covers capturing and analyzing traffic in a controlled lab (e.g., local VM network or test setup). Perform captures only with explicit permission on authorized networks. Unauthorized interception may violate laws.</p>
+      <ol>
+        <li>Launch Wireshark via VNC/X11 session in Termux.</li>
+        <li>Select capture interface: Choose the active network (e.g., wlan0 or eth0) from the welcome screen and click Start (blue shark fin icon).</li>
+        <li>Generate traffic: Open a browser or tool to create packets (e.g., visit HTTP sites, ping hosts, or simulate protocols).</li>
+        <li>Stop capture: Click the red square icon after sufficient packets are collected.</li>
+        <li>Apply display filter: In the filter bar, enter <code>http</code> and press Enter to show only HTTP traffic; or <code>tcp.port == 80</code> for port-specific.</li>
+        <li>Inspect details: Select a packet in the list pane; examine protocol layers in the packet details pane (expand HTTP > Line-based text data for payloads).</li>
+        <li>Follow stream: Right-click an HTTP packet > Follow > HTTP Stream to reconstruct requests/responses (e.g., view form data or credentials in cleartext—highlight risks).</li>
+        <li>Analyze anomalies: Look for patterns like repeated SYN packets (port scans) or unusual ICMP (recon). Use Statistics > Conversations for summaries.</li>
+        <li>Save capture: File > Save As (.pcapng) for later review or reporting.</li>
+      </ol>
+      <p>Expected outcome: Visible packet breakdown revealing protocol details, potential cleartext data, or attack indicators. Common issues: No packets—ensure correct interface and promiscuous mode if available. For advanced filters: <code>ip.src == 192.168.1.100 && http.request</code>.</p>
+      <img src="https://www.geeksforgeeks.org/wp-content/uploads/TCP-Analysis-using-Wireshark-1024x576.png" alt="Wireshark TCP Stream Example" class="img-fluid">
+      <p>Reference official guide: <a href="https://www.wireshark.org/docs/wsug_html_chunked/" target="_blank">Wireshark User's Guide</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

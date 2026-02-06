@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - SQLNinja</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-sqlninja">
+      <h2>SQLNinja</h2>
+      <p>SQLNinja is a Perl-based exploitation tool developed to target SQL injection vulnerabilities in web applications utilizing Microsoft SQL Server as the backend database. Its core objective is to enable remote access to the vulnerable database server—even in restricted or hostile network environments—through techniques such as privilege escalation, command execution, data extraction, and shell establishment. Originally released around 2006–2010 and maintained sporadically thereafter, SQLNinja automates post-injection takeover processes for penetration testers. It remains available in repositories such as Kali Linux and on SourceForge/GitHub mirrors.</p>
+      <img src="https://sqlninja.sourceforge.net/images/sqlninja_screenshot.png" alt="SQLNinja Command-Line Interface and Output Example" class="img-fluid">
+      <h3>Uses</h3>
+      <p>SQLNinja is employed in authorized penetration testing to exploit confirmed SQL injection flaws in Microsoft SQL Server-backed applications, escalate privileges (e.g., to sysadmin), execute OS commands, extract data, and establish reverse shells or other access channels. Example: Transitioning from a vulnerable parameter in a web form to full database server control, including disabling DEP, uploading executables, or launching Metasploit payloads, all within ethical and controlled assessments.</p>
+      <h3>Installation in Termux</h3>
+      <p>SQLNinja is a Perl script and runs on platforms with Perl support. In Termux, install via package manager (where available) or clone from a mirror repository:</p>
+      <pre><code>pkg update && pkg upgrade -y
+pkg install perl git -y
+# Option 1: If packaged (check availability)
+pkg install sqlninja -y
+# Option 2: Clone from GitHub mirror (verify integrity)
+git clone https://github.com/IFGHou/sqlninja.git
+cd sqlninja
+# Or from xxgrunge fork
+git clone https://github.com/xxgrunge/sqlninja.git
+# Run: perl sqlninja -h
+# Dependencies (if missing): cpan install IO::Socket::INET Getopt::Std</code></pre>
+      <p>Common issues: Perl module errors—install via cpan or pkg (e.g., perl-io-socket-ip); configuration file setup—copy sqlninja.conf.example to sqlninja.conf and edit. To uninstall: Remove the cloned directory or package. Ethical use requires explicit written permission on all tested systems.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Basic syntax: <code>perl sqlninja -m [mode] -f sqlninja.conf</code>. Key modes: test (verify injection), fingerprint (DB details), bruteforce (sa password), escalation (sysadmin rights), upload (file transfer), revshell (reverse shell), metasploit (payload wrapper). Edit sqlninja.conf for URL, vulnerable parameter, injection method, and evasion techniques. Run with -v for verbose output. Operate exclusively on authorized targets.</p>
+      <img src="https://www.kali.org/tools/sqlninja/images/sqlninja-usage.png" alt="SQLNinja Mode Selection and Execution Example" class="img-fluid">
+
+      <h3>Detailed Tutorial: Exploitation of Confirmed SQL Injection (Ethical Lab Scenario)</h3>
+      <p>This tutorial illustrates using SQLNinja to exploit a confirmed SQL injection vulnerability leading to OS command execution on a Microsoft SQL Server backend in a controlled lab environment (e.g., a deliberately vulnerable test application you own). This procedure is permitted only on systems you control or for which you have explicit written authorization. Unauthorized exploitation constitutes illegal access and may result in severe legal consequences.</p>
+      <ol>
+        <li>Prepare configuration: Copy sqlninja.conf.example to sqlninja.conf. Edit key sections: url (vulnerable endpoint), http_request (POST/GET payload with __SQL2INJECT__ marker), user_agent, proxy (if needed), and evasion techniques (e.g., hex encoding, random case).</li>
+        <li>Verify injection: Run test mode <code>perl sqlninja -m t -f sqlninja.conf</code>. SQLNinja attempts blind/time-based or error-based confirmation and reports success/failure.</li>
+        <li>Fingerprint the backend: <code>perl sqlninja -m f -f sqlninja.conf</code>. This identifies SQL Server version, current user privileges, xp_cmdshell availability, and authentication mode.</li>
+        <li>Escalate privileges (if needed): If not sa/sysadmin, use <code>perl sqlninja -m e -f sqlninja.conf</code> to add the current user to sysadmin role (requires sufficient initial privileges).</li>
+        <li>Enable command execution: If xp_cmdshell is disabled, resurrect it via <code>perl sqlninja -m x -f sqlninja.conf</code> (uses registry edits and debug.exe techniques).</li>
+        <li>Execute OS commands or get shell: Use <code>perl sqlninja -m c -f sqlninja.conf</code> for blind command execution, or <code>perl sqlninja -m revshell -f sqlninja.conf</code> for reverse TCP shell (configure listener IP/port in conf). Alternatively, <code>perl sqlninja -m metasploit -f sqlninja.conf</code> for Metasploit stager integration.</li>
+        <li>Extract data (optional): Use built-in extraction or switch to complementary tools like SQLmap for bulk dumping post-access.</li>
+        <li>Clean up and report: Interrupt with Ctrl+C. Document exploitation path, findings, and remediation steps (e.g., input sanitization, least-privilege accounts, WAF deployment). Securely delete test artifacts.</li>
+      </ol>
+      <p>Expected results: Successful takeover with command output or shell access if injection is exploitable and defenses are absent. Common issues: Evasion needed for WAF—enable multiple techniques in conf; timeouts—adjust delays; blocked outbound ports—try DNS/ICMP tunneling modes. Always prioritize defensive validation over exploitation.</p>
+      <img src="https://sqlninja.sourceforge.net/images/sqlninja_revshell.png" alt="SQLNinja Reverse Shell Establishment Example (historical demo)" class="img-fluid">
+      <p>For authoritative reference, consult the original project resources: <a href="https://sqlninja.sourceforge.net/" target="_blank">SQLNinja Official Page (SourceForge)</a>, <a href="https://github.com/IFGHou/sqlninja" target="_blank">GitHub Mirror (IFGHou)</a>, <a href="https://www.kali.org/tools/sqlninja/" target="_blank">Kali Linux Tool Documentation</a>, and the included sqlninja-howto.html for detailed configuration guidance.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

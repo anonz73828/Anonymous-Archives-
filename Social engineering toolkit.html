@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - Social-Engineer Toolkit (SET)</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-set">
+      <h2>Social-Engineer Toolkit (SET)</h2>
+      <p>The Social-Engineer Toolkit (SET) is an open-source penetration testing framework developed by TrustedSec specifically designed to automate and streamline social engineering attacks. It enables security professionals to create realistic phishing campaigns, harvest credentials, deliver malicious payloads, exploit client-side vulnerabilities, and simulate advanced social engineering scenarios. SET integrates tightly with Metasploit and supports a wide range of attack vectors, including website cloning, Java applet attacks, tabnabbing, QR code generation, and SMS-based phishing. The Community Edition is free and widely used in authorized red team exercises to evaluate human susceptibility and organizational security awareness.</p>
+      <img src="https://www.trustedsec.com/wp-content/uploads/2020/10/set-main-menu.png" alt="Social-Engineer Toolkit Main Menu Interface" class="img-fluid">
+      <h3>Uses</h3>
+      <p>SET is employed in ethical penetration testing to simulate real-world social engineering attacks, assess user awareness, test defensive controls (e.g., email filtering, endpoint protection), and demonstrate the human element in security breaches. Example: Cloning a legitimate login page to harvest credentials from test users in an authorized awareness campaign, or delivering a malicious payload disguised as a software update to evaluate endpoint detection capabilities in a controlled lab environment.</p>
+      <h3>Installation in Termux</h3>
+      <p>SET is Python-based and installs easily in Termux. It requires git, Python 3, and Metasploit (optional but recommended for payload delivery). Installation steps:</p>
+      <pre><code>pkg update && pkg upgrade -y
+pkg install git python python-pip -y
+git clone https://github.com/trustedsec/social-engineer-toolkit.git setoolkit
+cd setoolkit
+pip install -r requirements.txt
+python setup.py install   # or just run directly: python setoolkit
+# Launch: python setoolkit
+# First run will prompt to agree to terms and may install additional dependencies</code></pre>
+      <p>Common issues: Missing dependencies—rerun pip install -r requirements.txt; Metasploit integration—install msfconsole separately if needed; port conflicts—ensure no other service uses ports 80/443. To uninstall: Remove the setoolkit directory. Full functionality (especially payload delivery) is enhanced when paired with Metasploit running in the same environment.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Launch SET: <code>python setoolkit</code>. Main menu options: 1) Social-Engineering Attacks, 2) Penetration Testing (Fast-Track), 3) Third Party Modules, etc. Key attack vectors: Website Attack Vectors (credential harvester, tabnabbing, Java applet), Spear-Phishing Attack Vectors, Infectious Media Generator, QRCode Generator Attack Vector. Select options numerically; follow prompts to configure payloads, listener IPs/ports, and templates. Always test in isolated lab networks with explicit permission.</p>
+      <img src="https://www.trustedsec.com/wp-content/uploads/2020/10/set-credential-harvester.png" alt="SET Credential Harvester Attack Configuration" class="img-fluid">
+
+      <h3>Detailed Tutorial: Credential Harvesting via Website Cloning (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates using SET to clone a legitimate login page and harvest credentials in a controlled lab environment (e.g., testing your own awareness training program or a deliberately vulnerable test setup you own). This procedure is permitted only in authorized environments with explicit written permission from all participants and system owners. Unauthorized phishing or credential harvesting is illegal and unethical.</p>
+      <ol>
+        <li>Launch SET: Run <code>python setoolkit</code> in Termux (or your environment). Accept the terms if prompted.</li>
+        <li>Select attack type: Choose option 1) Social-Engineering Attacks → 2) Website Attack Vectors → 3) Credential Harvester Attack Method → 2) Site Cloner.</li>
+        <li>Configure listener: Enter your IP address for the reverse handler (e.g., your Termux device IP: 192.168.1.50). SET will start a local web server on port 80.</li>
+        <li>Specify target URL: Enter the legitimate login page URL to clone (e.g., https://example.com/login or a test page like http://localhost/dvwa/login.php). SET will clone the site and modify form action to post credentials back to your server.</li>
+        <li>Optional: Select templates (e.g., Gmail, Office 365, custom) or use the cloned site directly. SET starts Apache/HTTP server and displays "Credential Harvester is running on port 80".</li>
+        <li>Distribute phishing link (lab only): Send the generated URL (http://your-ip) to test users via email, QR code, or other means within the authorized scope. Monitor SET console for captured credentials.</li>
+        <li>Observe results: When a test user submits credentials on the cloned page, SET displays them in real time (e.g., username: testuser, password: Password123!). Credentials are also logged to /var/www/html/harvester_* or similar.</li>
+        <li>Stop and clean up: Press Ctrl+C in SET to terminate. Document captured data responsibly (for training purposes only). Recommend defenses: email filtering, user awareness training, MFA enforcement, and browser security indicators.</li>
+      </ol>
+      <p>Expected results: Successful capture of test credentials entered on the cloned page, demonstrating the effectiveness of phishing simulation. Common issues: Port 80/443 blocked—use a different port or run SET with elevated privileges; HTTPS cloning—use a real domain with SSL for realism (requires certificate); firewall/IDS detection—modern defenses may flag suspicious behavior.</p>
+      <img src="https://www.trustedsec.com/wp-content/uploads/2020/10/set-harvested-credentials.png" alt="SET Captured Credentials Display" class="img-fluid">
+      <p>For authoritative reference, consult the official resources: <a href="https://github.com/trustedsec/social-engineer-toolkit" target="_blank">Social-Engineer Toolkit GitHub Repository</a>, <a href="https://www.trustedsec.com/resources/tools/the-social-engineer-toolkit-set" target="_blank">TrustedSec SET Documentation</a>, and <a href="https://www.social-engineer.org/framework/" target="_blank">Social-Engineer.org Framework (complementary reading)</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

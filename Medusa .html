@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - Medusa</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-medusa">
+      <h2>Medusa</h2>
+      <p>Medusa is a speedy, massively parallel, modular login brute-forcer designed for network services that support remote authentication. It enables concurrent testing against multiple hosts, users, or passwords, with support for protocols such as FTP, HTTP, SSH, Telnet, SNMP, and others. Medusa is particularly useful in ethical penetration testing to assess authentication mechanism strength and identify weak credentials.</p>
+      <img src="https://www.kali.org/tools/medusa/images/medusa.svg" alt="Medusa Tool Logo and Example Output" class="img-fluid">
+      <h3>Uses</h3>
+      <p>Medusa is employed to perform brute-force and dictionary attacks on remote login services during authorized security assessments. Example: Testing FTP or web form authentication with credential lists to evaluate password policies and detect vulnerabilities to credential stuffing or weak authentication in controlled environments.</p>
+      <h3>Installation in Termux</h3>
+      <p>Medusa is not typically available as a pre-built package in Termux repositories and requires compilation from source. Install dependencies and build as follows:</p>
+      <pre><code>pkg update && pkg upgrade -y
+pkg install git build-essential libssh libssl-dev libpcre3-dev libidn libgtk2.0-dev libmysqlclient-dev libpq-dev libsvn-dev firebird-dev libmemcached-dev libgpg-error-dev libgcrypt-dev -y
+git clone https://github.com/jmk-foofus/medusa.git
+cd medusa
+./configure
+make
+# Optional install: make install (may require root or manual path adjustment)
+# Run: ./medusa -h</code></pre>
+      <p>Common issues: Missing development libraries—install additional -dev packages as prompted; compilation failures—ensure all dependencies are met or use a proot-distro (e.g., Ubuntu) for a fuller build environment. To uninstall: Remove the cloned directory and related packages. Always verify source integrity before building.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Basic syntax: <code>medusa -h target -u user -P passlist.txt -M module</code>. List modules: <code>medusa -d</code>. Use host/user/pass lists: <code>-H hosts.txt -U users.txt -P passwords.txt</code>. Thread control: <code>-T 10</code> (parallel tasks). Verbose: <code>-v 4</code>. Example FTP test: <code>medusa -h 192.168.1.100 -u admin -P rockyou.txt -M ftp</code>. Restrict usage to authorized targets only.</p>
+      <img src="https://www.kali.org/tools/medusa/images/medusa-usage.png" alt="Medusa Command Execution Example" class="img-fluid">
+
+      <h3>Detailed Tutorial: Dictionary Attack on FTP Service (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates using Medusa to conduct a dictionary attack against an FTP service in a controlled lab environment (e.g., a virtual machine running an FTP server with a weak, known password for the user 'ftpuser'). This procedure is permitted only on systems you own or for which you have explicit written authorization. Unauthorized brute-force attempts constitute illegal access and may trigger defensive measures or legal consequences.</p>
+      <ol>
+        <li>Prepare the target: Set up a test FTP server (e.g., vsftpd on a VM at 192.168.1.100) with a weak password for 'ftpuser'. Ensure the service is accessible from your Termux device.</li>
+        <li>Verify connectivity: Test basic FTP reachability with <code>ftp 192.168.1.100</code> (do not proceed without permission).</li>
+        <li>Run Medusa dictionary attack: Execute <code>medusa -h 192.168.1.100 -u ftpuser -P /path/to/rockyou.txt -M ftp -T 5 -v 4</code>. Here, -u specifies a single username, -P the password list, -M selects the FTP module, -T limits concurrent threads to 5 (adjust for performance), and -v 4 enables detailed verbose output.</li>
+        <li>Monitor progress: Medusa displays ongoing attempts, successful logins (e.g., ACCOUNT FOUND: [ftp] Host: 192.168.1.100 User: ftpuser Password: password123), and summary statistics upon completion or interruption.</li>
+        <li>Analyze results: If a valid credential is found, Medusa reports it clearly. Note any rate-limiting, account lockouts, or connection refusals triggered on the target.</li>
+        <li>Alternative with combined lists: For multiple users and hosts, use <code>medusa -H hosts.txt -U users.txt -P passwords.txt -M ftp -T 8</code>.</li>
+        <li>Clean up and report: Interrupt with Ctrl+C if necessary. Document findings responsibly, recommending multi-factor authentication, strong password policies, or monitoring for brute-force attempts.</li>
+      </ol>
+      <p>Expected results: Identification of weak credentials if present in the wordlist; otherwise, exhaustion of candidates with no valid login reported. Common issues: Protocol-specific errors—verify module options with <code>medusa -M ftp -q</code>; high thread counts may cause detection—reduce -T value accordingly.</p>
+      <img src="https://www.freecodecamp.org/news/content/images/2024/10/medusa-ftp-example.png" alt="Medusa FTP Brute-Force Output Example" class="img-fluid">
+      <p>For authoritative reference, consult the official repository: <a href="https://github.com/jmk-foofus/medusa" target="_blank">Medusa on GitHub</a> and documentation: <a href="https://jmk-foofus.github.io/medusa/medusa.html" target="_blank">Medusa Documentation</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

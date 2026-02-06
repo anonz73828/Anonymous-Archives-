@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - hping3</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-hping3">
+      <h2>hping3</h2>
+      <p>hping3 is a command-line network tool capable of sending custom TCP/IP packets with full control over header fields, flags, payload, sequence numbers, source/destination ports, and transmission timing. Originally developed by Salvatore Sanfilippo (antirez), it functions as an enhanced packet generator, allowing users to craft arbitrary IP, TCP, UDP, ICMP, and raw packets. hping3 is widely used in ethical network testing for firewall/IDS rule validation, port scanning, path MTU discovery, TCP sequence prediction, fragmentation testing, denial-of-service simulation, and traceroute-style probing with custom protocols. It remains one of the most flexible low-level packet crafting utilities available.</p>
+      <img src="https://www.hping.org/images/hping3_logo.png" alt="hping3 Logo" class="img-fluid">
+      <h3>Uses</h3>
+      <p>hping3 is employed in authorized penetration testing and network security assessments to test firewall filtering rules, evaluate IDS/IPS detection logic, perform stealthy port scanning, simulate fragmented or malformed traffic, measure latency/jitter, and validate TCP/IP stack behavior. Example: Sending crafted TCP packets with specific flags (SYN/ACK/RST) or payloads to determine firewall statefulness, or using ICMP/UDP mode to perform traceroute with arbitrary protocol evasion in a controlled lab environment.</p>
+      <h3>Installation in Termux</h3>
+      <p>hping3 is available in Termux repositories or can be compiled from source. Raw socket access typically requires root privileges (use tsu or a rooted device). Installation options:</p>
+      <pre><code>pkg update && pkg upgrade -y
+# Option 1: Install from Termux repository (recommended)
+pkg install hping3 -y
+# Option 2: Compile from source (for latest version or custom build)
+pkg install git build-essential libpcap-dev tcl-dev -y
+git clone https://github.com/antirez/hping.git
+cd hping
+./configure
+make
+make install
+# Test: hping3 --version</code></pre>
+      <p>Common issues: Permission denied on raw sockets—run with root (tsu -c hping3 ...); libpcap errors—ensure libpcap-dev is installed; missing tcl—some features (scripting) require tcl-dev. To uninstall: Remove the package or compiled binary. Full packet-crafting capabilities often require a rooted device or Kali NetHunter.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Basic SYN scan: <code>hping3 -S 192.168.1.1 -p 80 -c 1</code>. Flood mode: <code>hping3 --flood -S 192.168.1.1 -p 80</code>. Custom payload: <code>hping3 -d 120 -E payload.txt 192.168.1.1</code>. Traceroute with TCP: <code>hping3 --traceroute -V -1 8.8.8.8</code> (ICMP mode). Spoof source IP: <code>hping3 -a 1.2.3.4 192.168.1.1</code>. Fragmentation: <code>hping3 --frag 192.168.1.1</code>. Always test on networks and systems you own or have explicit written permission to probe.</p>
+      <img src="https://www.hping.org/images/hping3_output.png" alt="hping3 Console Output Example with TCP SYN Packets" class="img-fluid">
+
+      <h3>Detailed Tutorial: Firewall Rule Testing with Custom TCP Packets (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates using hping3 to send crafted TCP packets and observe firewall/IDS behavior in a controlled lab environment (e.g., a local network with a test firewall or target system you own). This procedure is permitted only on networks and systems you control or for which you have explicit written authorization. Unauthorized packet injection or probing is illegal and may be interpreted as a network attack.</p>
+      <ol>
+        <li>Prepare environment: Ensure hping3 is installed and you have root access (tsu or su). Identify your interface and target IP (e.g., firewall/gateway at 192.168.1.1). Confirm lab isolation and permission.</li>
+        <li>Test basic connectivity: Run <code>tsu -c "hping3 -c 3 192.168.1.1"</code> to send three default TCP packets and observe responses (SYN/ACK, RST, or no reply).</li>
+        <li>Send SYN packets to specific port: <code>tsu -c "hping3 -S -p 80 -c 5 192.168.1.1"</code>. This sends five TCP SYN packets to port 80. Expected: open port returns SYN/ACK, closed returns RST, filtered returns nothing or ICMP unreachable.</li>
+        <li>Test firewall filtering: Send packets with unusual flags:
+          <code>tsu -c "hping3 -S -p 80 --tcp-timestamp 192.168.1.1"</code> (SYN with TCP timestamp option)
+          <code>tsu -c "hping3 -F -p 80 192.168.1.1"</code> (FIN packet – may bypass stateless filters)
+          <code>tsu -c "hping3 -c 1 -d 100 -E /dev/zero 192.168.1.1 -p 443"</code> (large null-payload packet to test fragmentation handling)
+        </li>
+        <li>Perform stealth scan simulation: Send SYN packets slowly with randomized source ports:
+          <code>tsu -c "hping3 --rand-source -S -p 22,80,443 -i u10000 192.168.1.1"</code> (10 ms interval, random source IP spoofing – requires root)
+        </li>
+        <li>Observe and analyze: Monitor target firewall logs, IDS alerts, or system responses. Use Wireshark/tcpdump in parallel to capture hping3 traffic for verification. Note which packets are allowed/blocked and how the target responds (RST vs. drop vs. ICMP).</li>
+        <li>Document and report: Record packet types, flags, responses, and firewall behavior. Recommend improvements: stateful inspection, rate limiting, anomaly detection, and logging of malformed or suspicious packets.</li>
+      </ol>
+      <p>Expected results: Clear feedback on firewall filtering behavior (allowed, blocked, dropped, or reset) for various packet types, helping validate rule completeness and state tracking. Common issues: No response—target may silently drop; spoofing not working—requires root and proper interface configuration; high-rate packets dropped—network congestion or rate limiting on path.</p>
+      <img src="https://www.hping.org/images/hping3_flags_example.png" alt="hping3 Output Showing Various TCP Flag Combinations and Responses" class="img-fluid">
+      <p>For authoritative reference and source code, consult: <a href="https://www.hping.org/" target="_blank">hping Official Website</a>, <a href="https://github.com/antirez/hping" target="_blank">hping GitHub Repository</a>, <a href="https://linux.die.net/man/8/hping3" target="_blank">hping3 Man Page</a>, and <a href="https://packetlife.net/library/cheat-sheets/hping3/" target="_blank">PacketLife hping3 Cheat Sheet</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

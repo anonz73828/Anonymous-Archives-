@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - Hydra</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-hydra">
+      <h2>Hydra</h2>
+      <p>Hydra (THC-Hydra) is a highly parallelized login cracker developed by van Hauser and the THC team. It supports brute-force and dictionary attacks against remote authentication services across more than 50 protocols, including SSH, HTTP(S) forms, FTP, SMTP, RDP, and databases. Hydra is valued for its speed, flexibility in adding new modules, and ability to perform multi-threaded credential testing during authorized security assessments.</p>
+      <img src="https://www.kali.org/tools/hydra/images/hydra.svg" alt="Hydra Logo and Example Output" class="img-fluid">
+      <h3>Uses</h3>
+      <p>Hydra is utilized to evaluate the strength of authentication mechanisms by attempting credential combinations against services. Example: Testing SSH or web login forms with dictionary attacks to identify weak passwords in controlled penetration testing environments, thereby informing remediation recommendations.</p>
+      <h3>Installation in Termux</h3>
+      <p>Hydra may be available via Termux repositories or requires compilation from source for the latest features. Recommended approach:</p>
+      <pre><code>pkg update && pkg upgrade -y
+pkg install hydra -y  # If available in current repositories
+# If not found or for latest version, compile from source:
+pkg install git build-essential libssh libssl-dev libidn libpcre3-dev libgtk2.0-dev libmysqlclient-dev libpq-dev libsvn-dev firebird-dev libmemcached-dev libgpg-error-dev libgcrypt-dev libgcrypt20-dev -y
+git clone https://github.com/vanhauser-thc/thc-hydra.git
+cd thc-hydra
+./configure
+make
+# Install (optional): make install
+# Run: ./hydra -h</code></pre>
+      <p>Common issues: Missing dependencies—install required devel packages; compilation errors—ensure all libs are present or use a proot-distro (e.g., Ubuntu) for a more complete build environment. To uninstall: Remove the cloned directory and packages. Ethical use requires authorization on all tested systems.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Basic syntax: <code>hydra -l user -P passlist.txt target://ip/service</code>. Show help: <code>hydra -h</code>. Use lists: <code>-L users.txt -P passwords.txt</code>. Thread control: <code>-t 4</code> (tasks). Verbose: <code>-vV</code>. Example SSH test: <code>hydra -l admin -P rockyou.txt ssh://192.168.1.100</code>. Operate exclusively on authorized targets.</p>
+      <img src="https://www.kali.org/tools/hydra/images/hydra-usage.png" alt="Hydra Command Execution Example" class="img-fluid">
+
+      <h3>Detailed Tutorial: Brute-Force Testing an SSH Login (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates using Hydra to perform a dictionary attack against an SSH service in a controlled lab (e.g., a virtual machine running an SSH server with intentionally weak credentials you control). This procedure is permitted only on systems you own or for which you have explicit written authorization. Unauthorized credential testing constitutes illegal access.</p>
+      <ol>
+        <li>Prepare the environment: Set up a test SSH server (e.g., OpenSSH on a VM at 192.168.1.100) with a known weak password for the user 'testuser'. Create or obtain a wordlist (e.g., rockyou.txt) containing the correct password among others.</li>
+        <li>Verify connectivity: From Termux, test basic SSH reachability with <code>ssh testuser@192.168.1.100</code> (do not proceed without permission).</li>
+        <li>Run Hydra dictionary attack: Execute <code>hydra -l testuser -P /path/to/rockyou.txt -t 4 -vV ssh://192.168.1.100</code>. Here, -l specifies a single username, -P the password list, -t limits concurrent tasks to 4 (adjust based on system resources), and -vV enables verbose output for monitoring.</li>
+        <li>Monitor progress: Hydra displays real-time attempts, successful logins (if found), and statistics (e.g., [22][ssh] host: 192.168.1.100 login: testuser password: password123).</li>
+        <li>Analyze results: If successful, Hydra reports the valid credential pair. Review logs for rate-limiting or lockout indicators on the target (many services enforce fail2ban or similar protections).</li>
+        <li>Alternative with user list: For multiple users, use <code>hydra -L users.txt -P passwords.txt ssh://192.168.1.100 -t 6</code>.</li>
+        <li>Clean up and report: Stop the tool with Ctrl+C if needed. Document findings responsibly, recommending stronger passwords, key-based auth, or rate-limiting defenses.</li>
+      </ol>
+      <p>Expected results: Successful identification of weak credentials if present in the wordlist; otherwise, exhaustion of candidates with no valid login reported. Common issues: Connection refusals—verify service is running and firewall allows access; high task counts may trigger defenses—reduce -t value.</p>
+      <img src="https://hackviser.com/tactics/tools/hydra/images/hydra-ssh-example.png" alt="Hydra SSH Brute-Force Output Example" class="img-fluid">
+      <p>For authoritative reference, consult the official repository: <a href="https://github.com/vanhauser-thc/thc-hydra" target="_blank">THC-Hydra on GitHub</a> and Kali Linux tool documentation: <a href="https://www.kali.org/tools/hydra/" target="_blank">Kali Tools - Hydra</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

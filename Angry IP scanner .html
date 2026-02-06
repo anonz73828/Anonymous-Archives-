@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Anonymous Archives - Angry IP Scanner</title>
+  <!-- Paste the full <style> block from index.html here, including .binary-bg and animation keyframes for the upward-moving blue binary pattern -->
+</head>
+<body>
+  <div class="binary-bg"></div>
+  <!-- Navigation bar identical to other pages -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Anonymous Archives</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="education.html">Educational Resources</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tools.html">Tools and Software</a></li>
+          <!-- Include remaining navigation items as in previous pages -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <section id="tool-angryipscanner">
+      <h2>Angry IP Scanner</h2>
+      <p>Angry IP Scanner is a free, open-source, cross-platform network scanner designed for speed and simplicity. It scans IP ranges or individual addresses, pings hosts to determine live status, resolves hostnames, detects MAC addresses (via ARP), and scans for open ports. Additional fetchers retrieve NetBIOS names, shared folders, web server titles, and other information. It is widely used by network administrators for inventory, troubleshooting, and ethical reconnaissance on authorized networks.</p>
+      <img src="https://angryip.org/screenshots/windows10-hidpi.png" alt="Angry IP Scanner Main Interface on Windows (HiDPI)" class="img-fluid">
+      <h3>Uses</h3>
+      <p>Angry IP Scanner is employed for discovering live hosts, mapping network topology, identifying open ports, and gathering basic device information during authorized security audits or network management tasks. Example: Scanning a local subnet (e.g., 192.168.1.0/24) to inventory connected devices, verify IP usage, or detect unauthorized hosts in a controlled environment.</p>
+      <h3>Installation in Termux</h3>
+      <p>Angry IP Scanner is a Java-based GUI application (requires Java Runtime Environment 11+). It is not natively supported in Termux due to Android's GUI limitations. Use a proot-distro with X11/VNC for emulation, or run on a desktop OS:</p>
+      <pre><code># Recommended: Download from official site on desktop
+# Visit https://angryip.org/download/ and select your platform (Windows, Mac, Linux DEB/RPM, or portable JAR)
+# Requires Java 11+ (install via package manager or bundled versions)
+# For Termux/Android (limited GUI via VNC/X11):
+pkg install proot-distro -y
+proot-distro install ubuntu
+proot-distro login ubuntu
+# Inside Ubuntu chroot:
+apt update && apt upgrade -y
+apt install default-jre wget -y
+# Download latest JAR or DEB (adjust version):
+wget https://github.com/angryip/ipscan/releases/download/3.9.3/ipscan-3.9.3.jar
+# Run: java -jar ipscan-3.9.3.jar
+# For GUI: Set up VNC/X11 forwarding (requires external VNC viewer app)</code></pre>
+      <p>Common issues: GUI not rendering—configure VNC/X11 properly; performance lag—mobile emulation is slower than native desktop. To uninstall: Remove the proot-distro or JAR file. Full functionality and speed are best achieved on a desktop environment.</p>
+      <h3>Functions and Walkthroughs</h3>
+      <p>Basic scan: Enter IP range (e.g., 192.168.1.1 - 192.168.1.254) → Fetchers → Start. View results in columns (IP, Ping, Hostname, Ports, etc.). Export: File → Export As (CSV, TXT, XML). Preferences: Tools → Preferences for timeouts, threads, and fetchers. Command-line: java -jar ipscan.jar -f:range 192.168.1.1 192.168.1.254 -o results.txt. Always scan networks you own or have explicit written permission to access.</p>
+      <img src="https://angryip.org/screenshots/ubuntu-hidpi.png" alt="Angry IP Scanner Interface on Ubuntu (HiDPI)" class="img-fluid">
+
+      <h3>Detailed Tutorial: Basic Network Host Discovery (Ethical Lab Scenario)</h3>
+      <p>This tutorial demonstrates scanning a local subnet to identify live hosts and basic details using Angry IP Scanner in a controlled lab or home network you own. Perform scans exclusively on networks with explicit authorization. Unauthorized scanning of external or third-party networks may violate laws or terms of service.</p>
+      <ol>
+        <li>Launch Angry IP Scanner: Open the application (via desktop shortcut, JAR execution, or emulated GUI in Termux).</li>
+        <li>Configure scan range: In the "IP Range" field, enter your local subnet (e.g., 192.168.1.1 - 192.168.1.254 or CIDR 192.168.1.0/24). Use "Pick from network interfaces" for auto-detection of your current LAN.</li>
+        <li>Select fetchers: Click the "Fetchers" menu (or right-click column headers) → Enable desired columns (e.g., Hostname, MAC Address, Ping, Open Ports). Add port scanners via Fetchers → Add → Ports (e.g., check common ports 80, 443, 22, 445).</li>
+        <li>Start the scan: Click the "Start" button (play icon). The tool pings each address rapidly and populates results in real time (live hosts turn green; dead ones gray).</li>
+        <li>Monitor and filter: Watch progress in the status bar. Use filters (e.g., show only alive hosts) or sort columns. Pause/resume as needed.</li>
+        <li>Analyze results: Review columns for IP, status, hostname (via DNS/NetBIOS), MAC vendor, open ports, and additional fetched data (e.g., web titles if port 80/443 open).</li>
+        <li>Export data: File → Export As → Choose format (CSV recommended) → Save file for documentation or further analysis.</li>
+        <li>Clean up and report: Close the application. Document findings responsibly (e.g., inventory devices, note anomalies like unexpected hosts). Recommend network segmentation or monitoring for unauthorized devices.</li>
+      </ol>
+      <p>Expected results: A table of live hosts with details (e.g., router at .1, printers, phones, computers). Common issues: Slow scans—increase threads in Preferences; no MAC addresses—requires local subnet and ARP; firewall blocks—some hosts appear dead. For advanced usage, explore custom fetchers or command-line automation.</p>
+      <img src="https://angryip.org/screenshots/scan-results-example.png" alt="Angry IP Scanner Scan Results Example" class="img-fluid">
+      <p>For authoritative reference, consult the official resources: <a href="https://angryip.org/" target="_blank">Angry IP Scanner Official Website</a>, <a href="https://angryip.org/download" target="_blank">Download Page</a>, <a href="https://angryip.org/documentation" target="_blank">Documentation</a>, and <a href="https://github.com/angryip/ipscan" target="_blank">GitHub Repository</a>.</p>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
